@@ -50,16 +50,28 @@ class FootballWebAppHandler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         parsed = urlparse(path).path
-        if parsed == "/" or parsed == "":
-            return os.path.join(WEBAPP_DIR, "index.html")
-        if parsed.startswith("/assets/"):
-            rel = parsed.lstrip("/").replace("/", os.sep)
-            return os.path.join(BASE_DIR, rel)
         rel = parsed.lstrip("/").replace("/", os.sep)
-        candidate = os.path.join(WEBAPP_DIR, rel)
-        if os.path.exists(candidate):
-            return candidate
-        return os.path.join(BASE_DIR, rel)
+        if parsed == "/" or parsed == "":
+            root_idx = os.path.join(BASE_DIR, "index.html")
+            webapp_idx = os.path.join(WEBAPP_DIR, "index.html")
+            if os.path.exists(root_idx) and os.path.exists(webapp_idx):
+                return root_idx if os.path.getmtime(root_idx) >= os.path.getmtime(webapp_idx) else webapp_idx
+            if os.path.exists(root_idx):
+                return root_idx
+            return webapp_idx
+
+        if parsed.startswith("/assets/"):
+            return os.path.join(BASE_DIR, rel)
+
+        root_cand = os.path.join(BASE_DIR, rel)
+        webapp_cand = os.path.join(WEBAPP_DIR, rel)
+        if os.path.exists(root_cand) and os.path.exists(webapp_cand):
+            return root_cand if os.path.getmtime(root_cand) >= os.path.getmtime(webapp_cand) else webapp_cand
+        if os.path.exists(root_cand):
+            return root_cand
+        if os.path.exists(webapp_cand):
+            return webapp_cand
+        return webapp_cand
 
     def do_GET(self):
         parsed = urlparse(self.path)
