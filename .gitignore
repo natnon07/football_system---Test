@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Environment & IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.env
+venv/
+env/
+
+# OS Specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Temporary & Log Files
+*.log
+*.tmp
+*.bak
