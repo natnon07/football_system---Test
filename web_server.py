@@ -18,7 +18,7 @@ from database.db_manager import (
 )
 from utils.security import hash_password, verify_password
 
-PORT = 8080
+PORT = int(os.environ.get("PORT", 8080))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEBAPP_DIR = os.path.join(BASE_DIR, "webapp")
 DB_LOCK = threading.RLock()
@@ -204,6 +204,121 @@ class FootballWebAppHandler(SimpleHTTPRequestHandler):
                     self._send_json({"ok": False, "error": f"ไม่พบบัญชีผู้ใช้ {u}"})
                     return
                 self._send_json({"ok": True, "user": dict(user)})
+
+            elif action == "request_password_otp":
+                raw_email = (data.get("email") or "").strip().lower()
+                if not raw_email or "@" not in raw_email:
+                    self._send_json({"ok": False, "error": "กรุณากรอกอีเมลที่ถูกต้อง (เช่น user@example.com)"})
+                    return
+
+                # Search user in users, clubs, or agents
+                user = cursor.execute("SELECT id, username, email FROM users WHERE LOWER(TRIM(email)) = ?", (raw_email,)).fetchone()
+                if not user:
+                    club = cursor.execute("SELECT user_id, email, club_name FROM clubs WHERE LOWER(TRIM(email)) = ?", (raw_email,)).fetchone()
+                    if club and club["user_id"]:
+                        user = cursor.execute("SELECT id, username, email FROM users WHERE id = ?", (club["user_id"],)).fetchone()
+                if not user:
+                    agent = cursor.execute("SELECT user_id, email FROM agents WHERE LOWER(TRIM(email)) = ?", (raw_email,)).fetchone()
+                    if agent and agent["user_id"]:
+                        user = cursor.execute("SELECT id, username, email FROM users WHERE id = ?", (agent["user_id"],)).fetchone()
+                if not user:
+                    # Search by username prefix if email matches username
+                    prefix = raw_email.split("@")[0]
+                    user = cursor.execute("SELECT id, username, email FROM users WHERE LOWER(TRIM(username)) = ?", (prefix,)).fetchone()
+
+                import random
+                otp_code = f"{random.randint(100000, 999999)}"
+
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS password_resets (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        email TEXT NOT NULL,
+                        user_id INTEGER,
+                        otp_code TEXT NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        is_used INTEGER DEFAULT 0
+                    )
+                """)
+                uid = user["id"] if user else None
+                cursor.execute("INSERT INTO password_resets (email, user_id, otp_code) VALUES (?, ?, ?)", (raw_email, uid, otp_code))
+
+                # Log notification in email_notifications table
+                cursor.execute("""
+                    INSERT INTO email_notifications (recipient_email, recipient_name, subject, body, email_type, status)
+                    VALUES (?, ?, ?, ?, 'OTP_RESET', 'Sent')
+                """, (
+                    raw_email,
+                    user["username"] if user else "User",
+                    "รหัสยืนยันตัวตน (OTP) สำหรับตั้งรหัสผ่านใหม่",
+                    f"รหัส OTP ของคุณคือ: {otp_code} (มีอายุการใช้งาน 15 นาที)"
+                ))
+                conn.commit()
+                log_audit("OTP_SENT", f"Sent password reset OTP {otp_code} to {raw_email}", conn=conn)
+
+                self._send_json({
+                    "ok": True,
+                    "message": f"ระบบส่งรหัส OTP (6 หลัก) ไปยัง {raw_email} เรียบร้อยแล้ว",
+                    "email": raw_email,
+                    "otp_demo": otp_code
+                })
+
+            elif action == "verify_and_reset_password":
+                raw_email = (data.get("email") or "").strip().lower()
+                otp_code = (data.get("otp") or "").strip()
+                new_pw = (data.get("new_password") or "").strip()
+                confirm_pw = (data.get("confirm_password") or "").strip()
+
+                if not raw_email or not otp_code or not new_pw:
+                    self._send_json({"ok": False, "error": "กรุณากรอกข้อมูลให้ครบทุกช่อง"})
+                    return
+                if new_pw != confirm_pw:
+                    self._send_json({"ok": False, "error": "รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน"})
+                    return
+                if len(new_pw) < 4:
+                    self._send_json({"ok": False, "error": "รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร"})
+                    return
+
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS password_resets (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        email TEXT NOT NULL,
+                        user_id INTEGER,
+                        otp_code TEXT NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        is_used INTEGER DEFAULT 0
+                    )
+                """)
+                row = cursor.execute("""
+                    SELECT id, user_id, otp_code FROM password_resets
+                    WHERE LOWER(TRIM(email)) = ? AND otp_code = ? AND is_used = 0
+                    ORDER BY id DESC LIMIT 1
+                """, (raw_email, otp_code)).fetchone()
+
+                if not row:
+                    self._send_json({"ok": False, "error": "รหัส OTP ไม่ถูกต้อง หรือหมดอายุแล้ว"})
+                    return
+
+                cursor.execute("UPDATE password_resets SET is_used = 1 WHERE id = ?", (row["id"],))
+                pwd_hash = hash_password(new_pw)
+
+                target_uid = row["user_id"]
+                if not target_uid:
+                    u_row = cursor.execute("SELECT id FROM users WHERE LOWER(TRIM(email)) = ?", (raw_email,)).fetchone()
+                    if u_row:
+                        target_uid = u_row["id"]
+
+                if target_uid:
+                    cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (pwd_hash, target_uid))
+                    cursor.execute("UPDATE users SET email = ? WHERE id = ? AND (email IS NULL OR email = '')", (raw_email, target_uid))
+                else:
+                    cursor.execute("UPDATE users SET password_hash = ? WHERE LOWER(TRIM(email)) = ?", (pwd_hash, raw_email))
+
+                conn.commit()
+                log_audit("PASSWORD_RESET_SUCCESS", f"Password successfully reset with OTP for {raw_email}", conn=conn)
+                self._send_json({
+                    "ok": True,
+                    "message": "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว ท่านสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที"
+                })
 
             elif action == "register_club":
                 uname = (data.get("username") or "").strip().lower()
