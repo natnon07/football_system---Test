@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการซื้อขายนักฟุตบอลและเอเยนต์ (Football Transfer System)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=47">
+</head>
+<body>
+
+    <!-- ==================== 1. AUTHENTICATION SCREEN ==================== -->
+    <div id="auth-screen" class="auth-screen">
+
+        <!-- A. LOGIN VIEW: FOOTBALL TRANSFER PORTAL -->
+        <div id="login-view" class="football-portal-container">
+            
+            <!-- Top Transparent Header (ตามสไตล์รูป KKU + แบรนด์ของเรา) -->
+            <header class="football-portal-header">
+                <div class="football-header-brand" onclick="location.reload()" title="Football Manager Transfer System">
+                    <img src="/assets/logo.png" alt="Logo" class="football-logo-img" onerror="this.src='assets/logo.png'">
+                    <div class="football-brand-titles">
+                        <span class="football-brand-sub">FOOTBALL MANAGER</span>
+                        <span class="football-brand-main">SYSTEM & TRANSFER MARKET</span>
+                    </div>
+                </div>
+                <div class="football-header-right" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+                    <button type="button" class="btn-sound-toggle-dark" onclick="toggleSound()" title="เปิด/ปิดเสียงคลิก">
+                        <span class="sound-toggle-icon">🔊</span> <span class="sound-toggle-label">เสียง: เปิด</span>
+                    </button>
+                    <button type="button" class="football-nav-login-btn" onclick="openLoginModal()" title="เข้าสู่ระบบ">
+                        🔑 เข้าสู่ระบบ
+                    </button>
+                </div>
+            </header>
+
+            <!-- Fullscreen Hero Stage with Football Stadium Background & Carousel Slider -->
+            <div class="football-hero-stage" id="football-hero-stage">
+                <!-- Left Carousel Arrow (สไตล์ตามรูป KKU) -->
+                <button type="button" class="football-hero-arrow prev" onclick="slideHeroBg(-1)" title="ภาพก่อนหน้า" aria-label="Previous Slide">
+                    &#10094;
+                </button>
+
+                <!-- Center Section: Slogan Quote + Subtitle + Action Button (สไตล์ตามรูป KKU) -->
+                <div class="football-hero-center-box">
+                    <div class="football-hero-text-group">
+                        <h1 class="football-hero-quote">"ระบบจัดการตลาดซื้อขายและสัญญาสำหรับสโมสรฟุตบอล"</h1>
+                        <p class="football-hero-subtitle">ระบบศูนย์กลางสำหรับตรวจสอบคำขอซื้อขาย เอกสารสัญญา และจัดการรายชื่อนักเตะระดับมืออาชีพ</p>
+                    </div>
+
+                    <!-- Hero Ghost Buttons (สไตล์เดียวกับปุ่ม [เพิ่มเติม] ในรูป KKU) -->
+                    <div class="football-hero-actions">
+                        <button type="button" class="hero-ghost-btn" onclick="openLoginModal()" title="คลิกเพื่อเข้าสู่ระบบ">
+                            เข้าสู่ระบบ
+                        </button>
+                        <button type="button" class="hero-ghost-btn-sub" onclick="switchAuthPage('register')" title="ลงทะเบียนสโมสรใหม่">
+                            🏟️ ลงทะเบียนสโมสร
+                        </button>
+                        <button type="button" class="hero-ghost-btn-sub agent" onclick="switchAuthPage('register-agent')" title="ลงทะเบียนเอเยนต์">
+                            💼 ลงทะเบียนเอเยนต์
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Carousel Arrow -->
+                <button type="button" class="football-hero-arrow next" onclick="slideHeroBg(1)" title="ภาพถัดไป" aria-label="Next Slide">
+                    &#10095;
+                </button>
+
+                <!-- Bottom Dots Indicator -->
+                <div class="hero-dots-container" id="hero-dots-container"></div>
+            </div>
+
+            <!-- Login Modal Overlay (แสดงขึ้นมาเมื่อคลิกปุ่มเข้าสู่ระบบ ดีไซน์ Frosted Glass) -->
+            <div id="login-modal-overlay" class="login-modal-overlay hidden" onclick="handleLoginModalBackdrop(event)">
+                <div class="football-login-card" id="football-login-card" onclick="event.stopPropagation()">
+                    <!-- Close Modal Button -->
+                    <button type="button" class="btn-close-login-modal" onclick="closeLoginModal()" title="ปิดหน้าต่าง">✕</button>
+
+                    <!-- Subview 1: Standard Login Form -->
+                    <div id="auth-subview-login">
+                        <!-- Card Header with Brand Logo -->
+                        <div class="split-brand-header" style="margin-bottom: 14px;">
+                            <img src="/assets/logo.png" alt="Logo" class="split-brand-logo-img" onerror="this.src='/assets/logo.png'">
+                            <div>
+                                <div class="split-brand-logo-text" style="color: #FFFFFF;">FOOTBALL MANAGER</div>
+                                <div style="font-size: 11px; font-weight: 700; color: #FED7AA; letter-spacing: 0.5px;">เข้าสู่ระบบเจ้าหน้าที่ & สโมสร</div>
+                            </div>
+                        </div>
+
+                        <form id="login-form" onsubmit="handleLoginSubmit(event)">
+                            <!-- Field 1: USERNAME -->
+                            <div class="split-form-group">
+                                <label class="split-input-label" for="login-username" style="color: #E2E8F0;">ชื่อผู้ใช้ (Username)</label>
+                                <input type="text" id="login-username" class="split-form-input" style="background: rgba(15, 23, 42, 0.75); color: #FFFFFF; border-color: rgba(255,255,255,0.2);" placeholder="กรอกชื่อผู้ใช้..." autocomplete="username" required>
+                            </div>
+
+                            <!-- Field 2: PASSWORD -->
+                            <div class="split-form-group">
+                                <label class="split-input-label" for="login-password" style="color: #E2E8F0;">รหัสผ่าน (Password)</label>
+                                <div class="split-password-wrapper">
+                                    <input type="password" id="login-password" class="split-form-input" style="background: rgba(15, 23, 42, 0.75); color: #FFFFFF; border-color: rgba(255,255,255,0.2);" placeholder="••••••••" autocomplete="current-password" required>
+                                    <button type="button" class="split-show-pass-btn" onclick="toggleLoginPassword()" id="eye-toggle-btn" style="color: #FED7AA;">แสดง</button>
+                                </div>
+                            </div>
+
+                            <!-- Options Row -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 12.5px;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #CBD5E1;">
+                                    <input type="checkbox" id="remember-me" checked style="accent-color: #EA580C;">
+                                    <span>จดจำการเข้าสู่ระบบ</span>
+                                </label>
+                                <button type="button" class="link-btn" style="color: #FED7AA; background: transparent; border: none; cursor: pointer; font-size: 12.5px; font-weight: 600;" onclick="switchAuthSubView('forgot-step1')">ลืมรหัสผ่าน? (Forgot Password / OTP)</button>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="split-btn-submit" style="background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%); font-weight: 800;">เข้าสู่ระบบ</button>
+                        </form>
+
+                        <!-- Inline Alert Message -->
+                        <div id="auth-alert" class="hidden" style="margin-top: 12px; padding: 10px 14px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 10px; color: #DC2626; font-size: 13px; font-weight: 600;"></div>
+
+                        <!-- Footer Row -->
+                        <div class="split-login-footer" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 14px; padding-top: 12px; color: #94A3B8;">
+                            <span style="font-size: 11px;">© 2026 FOOTBALL TRANSFERS</span>
+                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                <button type="button" class="split-link-btn" onclick="switchAuthPage('register')" style="color: #FED7AA;">
+                                    🏟️ ลงทะเบียนสโมสร ➔
+                                </button>
+                                <button type="button" class="split-link-btn" onclick="switchAuthPage('register-agent')" style="color: #60A5FA; font-weight: 700;">
+                                    💼 ลงทะเบียนเอเยนต์ ➔
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subview 2: หน้าลืมรหัสผ่าน (Forgot Password) -->
+                    <div id="auth-subview-forgot-step1" class="hidden">
+                        <div class="split-brand-header" style="margin-bottom: 14px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(234, 88, 12, 0.2); border: 1.5px solid #EA580C; display: flex; align-items: center; justify-content: center; font-size: 19px;">
+                                🔑
+                            </div>
+                            <div>
+                                <div style="font-size: 17px; font-weight: 800; color: #FFFFFF;">กู้คืนรหัสผ่าน (Forgot Password)</div>
+                                <div style="font-size: 11.5px; color: #FED7AA; font-weight: 600;">ระบบยืนยันตัวตนด้วยรหัส OTP</div>
+                            </div>
+                        </div>
+
+                        <form id="forgot-step1-form" onsubmit="handleRequestOtpSubmit(event)">
+                            <p style="font-size: 12.5px; color: #CBD5E1; margin-bottom: 16px; line-height: 1.5;">
+                                หากผู้ใช้งานลืมรหัสผ่านหรือต้องการเปลี่ยนรหัสผ่านใหม่ เมื่อกรอกอีเมลที่ใช้ลงทะเบียนแล้ว ระบบจะส่งรหัสยืนยันตัวตน (OTP) ไปยังอีเมลของท่าน
+                            </p>
+
+                            <!-- Step 1: 1) กรอกอีเมลที่ใช้ลงทะเบียนในระบบ -->
+                            <div class="split-form-group">
+                                <label class="split-input-label" for="forgot-email" style="color: #E2E8F0;">
+                                    <span style="color: #EA580C; font-weight: 800;">1)</span> กรอกอีเมลที่ใช้ลงทะเบียนในระบบ (Registered Email)
+                                </label>
+                                <input type="email" id="forgot-email" class="split-form-input" style="background: rgba(15, 23, 42, 0.75); color: #FFFFFF; border-color: rgba(255,255,255,0.2);" placeholder="ระบุอีเมลที่ลงทะเบียน เช่น contact@club.com..." required>
+                            </div>
+
+                            <!-- Alert Box for Step 1 -->
+                            <div id="forgot-step1-alert" class="hidden" style="margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 600;"></div>
+
+                            <!-- Step 2: 2) กดปุ่มส่งรหัส OTP ไปยังอีเมล (Send OTP To Email) -->
+                            <button type="submit" id="btn-send-otp" class="split-btn-submit" style="background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span style="background: rgba(255,255,255,0.25); padding: 2px 7px; border-radius: 999px; font-size: 12px;">2)</span> ส่งรหัส OTP ไปยังอีเมล (Send OTP To Email) ➔
+                            </button>
+                        </form>
+
+                        <div style="margin-top: 14px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+                            <button type="button" class="split-link-btn" onclick="switchAuthSubView('login')" style="color: #CBD5E1; font-size: 12.5px;">
+                                ⬅ กลับหน้าเข้าสู่ระบบ (Back to Login)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Subview 3: หน้าตั้งรหัสผ่านใหม่ด้วยรหัส OTP (Reset Password with OTP) -->
+                    <div id="auth-subview-forgot-step2" class="hidden">
+                        <div class="split-brand-header" style="margin-bottom: 14px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(34, 197, 94, 0.2); border: 1.5px solid #22C55E; display: flex; align-items: center; justify-content: center; font-size: 19px;">
+                                🛡️
+                            </div>
+                            <div>
+                                <div style="font-size: 16px; font-weight: 800; color: #FFFFFF;">ตั้งรหัสผ่านใหม่ด้วยรหัส OTP</div>
+                                <div style="font-size: 11.5px; color: #86EFAC; font-weight: 600;">Reset Password with OTP</div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(234, 88, 12, 0.12); border: 1px solid rgba(234, 88, 12, 0.35); border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="font-size: 12px; color: #FED7AA;">
+                                รหัสส่งไปที่: <strong id="forgot-target-email-display" style="color: #FFFFFF;"></strong>
+                            </div>
+                            <button type="button" onclick="handleResendOtp()" style="background: transparent; border: none; color: #60A5FA; font-size: 11.5px; font-weight: 700; cursor: pointer; text-decoration: underline;">
+                                ส่ง OTP อีกครั้ง
+                            </button>
+                        </div>
+
+                        <!-- Demo Hint Card showing OTP for instant testing & screenshot taking -->
+                        <div id="demo-otp-banner" class="hidden" style="background: #14532D; border: 1.5px solid #22C55E; border-radius: 10px; padding: 8px 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="font-size: 12px; color: #DCFCE7;">
+                                ✉️ รหัส OTP ที่ได้รับ: <strong id="demo-otp-code-val" style="font-size: 16px; letter-spacing: 2px; color: #FDE047;"></strong>
+                            </div>
+                            <button type="button" onclick="autoFillOtp()" style="background: #22C55E; color: #052E16; font-size: 11px; font-weight: 800; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer;">
+                                ใส่รหัสนี้
+                            </button>
+                        </div>
+
+                        <form id="forgot-step2-form" onsubmit="handleVerifyResetSubmit(event)">
+                            <!-- Step 3: 3) กรอกรหัส OTP ที่ได้รับทางอีเมล -->
+                            <div class="split-form-group">
+                                <label class="split-input-label" for="forgot-otp" style="color: #E2E8F0;">
+                                    <span style="color: #22C55E; font-weight: 800;">3)</span> กรอกรหัส OTP ที่ได้รับทางอีเมล (6 หลัก)
+                                </label>
+                                <input type="text" id="forgot-otp" class="split-form-input" style="background: rgba(15, 23, 42, 0.85); color: #FDE047; border-color: rgba(34, 197, 94, 0.6); font-size: 20px; font-weight: 800; letter-spacing: 6px; text-align: center;" placeholder="••••••" maxlength="6" required>
+                            </div>
+
+                            <!-- Step 4: 4) กรอกรหัสผ่านใหม่ (New Password) และยืนยันรหัสผ่านใหม่ (Confirm Password) -->
+                            <div class="split-form-group">
+                                <label class="split-input-label" for="forgot-new-password" style="color: #E2E8F0;">
+                                    <span style="color: #22C55E; font-weight: 800;">4)</span> กรอกรหัสผ่านใหม่ (New Password)
+                                </label>
+                                <div class="split-password-wrapper">
+                                    <input type="password" id="forgot-new-password" class="split-form-input" style="background: rgba(15, 23, 42, 0.75); color: #FFFFFF; border-color: rgba(255,255,255,0.2);" placeholder="กำหนดรหัสผ่านใหม่..." required>
+                                    <button type="button" class="split-show-pass-btn" onclick="togglePassVisibility('forgot-new-password', this)" style="color: #FED7AA;">แสดง</button>
+                                </div>
+                            </div>
+
+                            <div class="split-form-group">
+                                <label class="split-input-label" for="forgot-confirm-password" style="color: #E2E8F0;">
+                                    <span style="color: #22C55E; font-weight: 800;">4)</span> ยืนยันรหัสผ่านใหม่ (Confirm Password)
+                                </label>
+                                <div class="split-password-wrapper">
+                                    <input type="password" id="forgot-confirm-password" class="split-form-input" style="background: rgba(15, 23, 42, 0.75); color: #FFFFFF; border-color: rgba(255,255,255,0.2);" placeholder="ยืนยันรหัสผ่านใหม่อีกครั้ง..." required>
+                                    <button type="button" class="split-show-pass-btn" onclick="togglePassVisibility('forgot-confirm-password', this)" style="color: #FED7AA;">แสดง</button>
+                                </div>
+                            </div>
+
+                            <!-- Alert Box for Step 2 -->
+                            <div id="forgot-step2-alert" class="hidden" style="margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 600;"></div>
+
+                            <!-- Step 5: 5) กดปุ่มยืนยันการเปลี่ยนรหัสผ่าน (Reset Password) -->
+                            <button type="submit" id="btn-reset-pw-submit" class="split-btn-submit" style="background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span style="background: rgba(255,255,255,0.25); padding: 2px 7px; border-radius: 999px; font-size: 12px;">5)</span> ยืนยันการเปลี่ยนรหัสผ่าน (Reset Password) ✔
+                            </button>
+                        </form>
+
+                        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+                            <button type="button" class="split-link-btn" onclick="switchAuthSubView('forgot-step1')" style="color: #CBD5E1; font-size: 12.5px;">
+                                ⬅ ย้อนกลับไปขั้นตอนก่อนหน้า
+                            </button>
+                            <button type="button" class="split-link-btn" onclick="switchAuthSubView('login')" style="color: #94A3B8; font-size: 12px;">
+                                ยกเลิก
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Subview 4: Success View -->
+                    <div id="auth-subview-forgot-success" class="hidden" style="text-align: center; padding: 16px 0;">
+                        <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(34, 197, 94, 0.2); border: 2px solid #22C55E; color: #22C55E; font-size: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                            ✔
+                        </div>
+                        <h3 style="font-size: 19px; font-weight: 800; color: #FFFFFF; margin-bottom: 8px;">เปลี่ยนรหัสผ่านสำเร็จ!</h3>
+                        <p style="font-size: 13px; color: #CBD5E1; line-height: 1.5; margin-bottom: 22px;">
+                            รหัสผ่านใหม่ของคุณได้รับการอัปเดตเรียบร้อยแล้ว ท่านสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที
+                        </p>
+                        <button type="button" class="split-btn-submit" onclick="finishPasswordResetToLogin()" style="background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%); font-weight: 800;">
+                            เข้าสู่ระบบด้วยรหัสผ่านใหม่ ➔
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B. IN-PAGE CLUB REGISTRATION VIEW (No Popup) -->
+        <div id="register-view" class="register-page-card hidden">
+            <div class="register-header">
+                <button type="button" class="btn-back-page" onclick="switchAuthPage('login')">
+                    ⬅ กลับหน้าเข้าสู่ระบบ
+                </button>
+                <div>
+                    <h2 style="font-size: 20px; font-weight: 700; color: #0F172A;">🏟️ ลงทะเบียนสโมสรใหม่ & ตรวจสอบสถานะการเงิน</h2>
+                    <p style="font-size: 12px; color: #64748B;">กรอกข้อมูลสโมสรและแนบเอกสารทางการเงิน (Proof of Funds / Bank Statement) เพื่อให้ Admin อนุมัติวงเงิน</p>
+                </div>
+            </div>
+
+            <!-- Role Selector Toggle -->
+            <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                <div style="display: inline-flex; background: #FFF7ED; border: 1.5px solid #FED7AA; border-radius: 999px; padding: 3px; gap: 4px;">
+                    <button type="button" class="auth-role-tab active" onclick="switchAuthPage('register')">🏟️ ลงทะเบียนสโมสร (Club)</button>
+                    <button type="button" class="auth-role-tab" onclick="switchAuthPage('register-agent')">💼 ลงทะเบียนเอเยนต์ (Agent)</button>
+                </div>
+            </div>
+
+            <form id="register-form" onsubmit="handleRegisterSubmit(event)">
+                <div class="register-grid">
+                    <!-- Left Column -->
+                    <div class="reg-section-box">
+                        <div class="reg-section-title">1. ข้อมูลสโมสร & บัญชีเข้าใช้งาน</div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>ชื่อสโมสรอย่างเป็นทางการ</label>
+                                <input type="text" id="reg-club-name" class="form-control" placeholder="เช่น AC Milan, Dortmund" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ประเทศ / ลีกการแข่งขัน</label>
+                                <select id="reg-league" class="form-control">
+                                    <option value="Germany - Bundesliga">Germany - Bundesliga</option>
+                                    <option value="England - Premier League">England - Premier League</option>
+                                    <option value="Spain - La Liga">Spain - La Liga</option>
+                                    <option value="Italy - Serie A">Italy - Serie A</option>
+                                    <option value="France - Ligue 1">France - Ligue 1</option>
+                                    <option value="Other International League">Other International League</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>ชื่อผู้ใช้งานสำหรับเข้าสู่ระบบ (Username)</label>
+                            <input type="text" id="reg-username" class="form-control" placeholder="เช่น dortmund_fc" required>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>อีเมลสโมสรสำหรับติดต่อ</label>
+                                <input type="email" id="reg-email" class="form-control" placeholder="contact@club.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ยืนยันอีเมลอีกครั้ง (Re-check Email)</label>
+                                <input type="email" id="reg-email-confirm" class="form-control" placeholder="ยืนยันอีเมลให้ตรงกัน" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>รหัสผ่าน</label>
+                                <input type="password" id="reg-password" class="form-control" placeholder="อย่างน้อย 4 ตัวอักษร" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ยืนยันรหัสผ่านอีกครั้ง</label>
+                                <input type="password" id="reg-password-confirm" class="form-control" placeholder="ยืนยันรหัสผ่าน" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="reg-section-box">
+                        <div class="reg-section-title">2. วงเงินงบประมาณ & เอกสารการเงิน</div>
+
+                        <div class="form-group">
+                            <label>วงเงินงบประมาณที่ต้องการยืนยัน (€ ยูโร)</label>
+                            <input type="number" id="reg-budget" class="form-control" value="150000000" min="1000000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>ธนาคารผู้ออกเอกสารรับรอง</label>
+                            <select id="reg-bank" class="form-control">
+                                <option value="Deutsche Sporting & Corporate Bank">Deutsche Sporting & Corporate Bank</option>
+                                <option value="Santander Corporate & Investment Bank">Santander Corporate & Investment Bank</option>
+                                <option value="Barclays Corporate Banking">Barclays Corporate Banking</option>
+                                <option value="BNP Paribas Wealth & Sports Finance">BNP Paribas Wealth & Sports Finance</option>
+                                <option value="UBS Switzerland AG">UBS Switzerland AG</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 14px;">
+                            <label>🛡️ ตราสโมสร / โลโก้สโมสร (Club Logo / Crest) <span style="font-size: 11px; color: #64748B; font-weight: normal;">(PNG / JPG / WEBP)</span></label>
+                            <input type="file" id="reg-club-logo" class="form-control" style="padding-top: 6px;" accept="image/*" onchange="handleClubLogoPreview(this, 'reg-club-logo-preview')">
+                            <div id="reg-club-logo-preview-box" class="hidden" style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                                <img id="reg-club-logo-preview" src="" style="width: 48px; height: 48px; object-fit: contain; border-radius: 8px; background: #fff; border: 1.5px solid #FED7AA; padding: 2px;">
+                                <span style="font-size: 12px; color: #16A34A; font-weight: 700;">✓ เลือกตราสโมสรเรียบร้อย</span>
+                            </div>
+                        </div>
+
+                        <div class="doc-box">
+                            <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">📎 เอกสารหลักฐานรับรองสถานะทางการเงิน</div>
+                            <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">แนบไฟล์ Bank Statement หรือหนังสือรับรองทางการเงิน (.png, .jpg, .jpeg, .pdf)</div>
+                            <div id="reg-doc-status" style="font-size: 12px; font-weight: 600; color: #EF4444; margin-bottom: 10px;">⚠️ ยังไม่ได้แนบเอกสารการเงิน</div>
+                            <input type="hidden" id="reg-doc-path" value="">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <label class="btn-back-page" style="cursor: pointer; font-size: 12px; padding: 6px 12px;">
+                                    📎 เลือกไฟล์...
+                                    <input type="file" id="reg-file-input" style="display: none;" accept=".png,.jpg,.jpeg,.pdf" onchange="handleRegFileSelect(this)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="reg-error-msg" class="hidden" style="color: #EF4444; font-size: 13px; font-weight: 600; margin-bottom: 10px;"></div>
+
+                        <button type="submit" class="btn-primary-full">
+                            🚀 ส่งคำขอลงทะเบียนสโมสร & ยื่นเอกสารการเงิน
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- B2. IN-PAGE AGENT REGISTRATION VIEW -->
+        <div id="register-agent-view" class="register-page-card hidden">
+            <div class="register-header">
+                <button type="button" class="btn-back-page" onclick="switchAuthPage('login')">
+                    ⬅ กลับหน้าเข้าสู่ระบบ
+                </button>
+                <div>
+                    <h2 style="font-size: 20px; font-weight: 700; color: #0F172A;">💼 ลงทะเบียนเอเยนต์ใหม่ (Agent Registration)</h2>
+                    <p style="font-size: 12px; color: #64748B;">สร้างบัญชีตัวแทนนักฟุตบอล เพื่อบริหารสัญญา นักเตะในความดูแล และเจรจาตลาดซื้อขายกับสโมสรชั้นนำ</p>
+                </div>
+            </div>
+
+            <!-- Role Selector Toggle -->
+            <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                <div style="display: inline-flex; background: #FFF7ED; border: 1.5px solid #FED7AA; border-radius: 999px; padding: 3px; gap: 4px;">
+                    <button type="button" class="auth-role-tab" onclick="switchAuthPage('register')">🏟️ ลงทะเบียนสโมสร (Club)</button>
+                    <button type="button" class="auth-role-tab active" onclick="switchAuthPage('register-agent')">💼 ลงทะเบียนเอเยนต์ (Agent)</button>
+                </div>
+            </div>
+
+            <form id="register-agent-form" onsubmit="handleRegisterAgentSubmit(event)">
+                <div class="register-grid">
+                    <!-- Left Column: Personal & Agency Info -->
+                    <div class="reg-section-box">
+                        <div class="reg-section-title">1. ข้อมูลตัวแทน & สังกัดเอเยนซี่</div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>ชื่อจริง (First Name)</label>
+                                <input type="text" id="reg-agent-firstname" class="form-control" placeholder="เช่น Jorge, Mino" required>
+                            </div>
+                            <div class="form-group">
+                                <label>นามสกุล (Last Name)</label>
+                                <input type="text" id="reg-agent-lastname" class="form-control" placeholder="เช่น Mendes, Raiola" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>สังกัดเอเยนซี่ / บริษัทตัวแทน (Agency Name)</label>
+                            <input type="text" id="reg-agent-agency" class="form-control" placeholder="เช่น Gestifute, Stellar Group หรือระบุ 'อิสระ'" value="Gestifute" required>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>ประเทศที่ตั้งสำนักงาน (Country / Base)</label>
+                                <select id="reg-agent-country" class="form-control">
+                                    <option value="Portugal">Portugal (โปรตุเกส)</option>
+                                    <option value="England">England (อังกฤษ)</option>
+                                    <option value="Spain">Spain (สเปน)</option>
+                                    <option value="Germany">Germany (เยอรมนี)</option>
+                                    <option value="Italy">Italy (อิตาลี)</option>
+                                    <option value="France">France (ฝรั่งเศส)</option>
+                                    <option value="Thailand">Thailand (ไทย)</option>
+                                    <option value="International">International (สากล)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>หมายเลขใบอนุญาตตัวแทน (License ID)</label>
+                                <input type="text" id="reg-agent-license" class="form-control" placeholder="เช่น FIFA-AG-2026-901" value="FIFA-AG-2026-901">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Account & Security -->
+                    <div class="reg-section-box">
+                        <div class="reg-section-title">2. บัญชีผู้ใช้งาน & การตั้งรหัสผ่าน</div>
+
+                        <div class="form-group">
+                            <label>ชื่อผู้ใช้งานสำหรับเข้าสู่ระบบ (Username)</label>
+                            <input type="text" id="reg-agent-username" class="form-control" placeholder="เช่น jorge_mendes, agent_thai" required>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>อีเมลติดต่ออย่างเป็นทางการ (Official Email)</label>
+                                <input type="email" id="reg-agent-email" class="form-control" placeholder="agent@gestifute.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ยืนยันอีเมลอีกครั้ง (Re-check Email)</label>
+                                <input type="email" id="reg-agent-email-confirm" class="form-control" placeholder="ยืนยันอีเมลให้ตรงกัน" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>รหัสผ่าน</label>
+                                <input type="password" id="reg-agent-password" class="form-control" placeholder="อย่างน้อย 4 ตัวอักษร" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ยืนยันรหัสผ่านอีกครั้ง</label>
+                                <input type="password" id="reg-agent-password-confirm" class="form-control" placeholder="ยืนยันรหัสผ่าน" required>
+                            </div>
+                        </div>
+
+                        <div id="reg-agent-error-msg" class="hidden" style="color: #EF4444; font-size: 13px; font-weight: 600; margin-bottom: 10px;"></div>
+
+                        <button type="submit" class="btn-primary-full" style="margin-top: 14px; background: linear-gradient(135deg, #FF6600 0%, #EA580C 100%);">
+                            🚀 ยืนยันการลงทะเบียนเอเยนต์ (เปิดใช้งานบัญชีทันที)
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- C. IN-PAGE REGISTRATION SUCCESS VIEW (Club) -->
+        <div id="register-success-view" class="register-page-card hidden" style="max-width: 520px; text-align: center;">
+            <div style="font-size: 46px; margin-bottom: 6px;">🎉</div>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">ยื่นเอกสารการเงินเรียบร้อยแล้ว!</h2>
+            <div id="success-club-title" style="font-size: 15px; font-weight: 600; color: #1B9AE5; margin-bottom: 16px;"></div>
+
+            <div class="reg-section-box" style="text-align: left; margin-bottom: 20px;">
+                <div id="success-budget" style="font-size: 14px; font-weight: 600; margin-bottom: 4px;"></div>
+                <div id="success-email" style="font-size: 13px; color: #1B9AE5; font-weight: 600; margin-bottom: 4px;"></div>
+                <div style="font-size: 13px; color: #F59E0B; font-weight: 600; margin-bottom: 6px;">⏳ สถานะบัญชี: รอแอดมินตรวจสอบเอกสารการเงิน</div>
+                <div style="font-size: 12px; color: #64748B;">เมื่อ Admin ตรวจสอบเอกสารแล้ว ระบบจะส่งอีเมลแจ้งผลการอนุมัติ/ปฏิเสธไปยังอีเมลของท่านโดยอัตโนมัติ</div>
+            </div>
+
+            <button type="button" class="btn-primary-full" style="max-width: 260px;" onclick="finishRegistrationToLogin()">
+                ⬅ ตกลง / กลับสู่หน้าเข้าสู่ระบบ
+            </button>
+        </div>
+
+        <!-- C2. IN-PAGE AGENT REGISTRATION SUCCESS VIEW -->
+        <div id="register-agent-success-view" class="register-page-card hidden" style="max-width: 520px; text-align: center;">
+            <div style="font-size: 46px; margin-bottom: 6px;">🎉</div>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px; color: #0F172A;">ลงทะเบียนเอเยนต์สำเร็จแล้ว!</h2>
+            <div id="success-agent-title" style="font-size: 15px; font-weight: 600; color: #EA580C; margin-bottom: 16px;"></div>
+
+            <div class="reg-section-box" style="text-align: left; margin-bottom: 20px;">
+                <div id="success-agent-agency" style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #0F172A;"></div>
+                <div id="success-agent-email" style="font-size: 13px; color: #EA580C; font-weight: 600; margin-bottom: 6px;"></div>
+                <div style="font-size: 13px; color: #10B981; font-weight: 700; margin-bottom: 6px;">✔️ สถานะบัญชี: เปิดใช้งานพร้อมปฏิบัติหน้าที่ทันที (Active)</div>
+                <div style="font-size: 12px; color: #64748B;">ท่านสามารถเข้าสู่ระบบเพื่อเพิ่มนักเตะใหม่ในความดูแล รับข้อเสนอซื้อตัว และเจรจาสัญญากับสโมสรได้ทันที</div>
+            </div>
+
+            <button type="button" class="btn-primary-full" style="max-width: 260px; background: linear-gradient(135deg, #FF6600 0%, #EA580C 100%);" onclick="finishRegistrationToLogin()">
+                ⬅ เข้าสู่ระบบทันที
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ==================== 2. MAIN WEB APP DASHBOARD ==================== -->
+    <div id="dashboard-screen" class="hidden">
+        <!-- Top Operations Navbar (เป๊ะตามแบบที่ผู้ใช้ต้องการ) -->
+        <header class="operations-header">
+            <div class="header-left">
+                <div class="header-logo-badge">
+                    <img src="/assets/logo.png" alt="Logo" style="width: 38px; height: 38px; object-fit: contain; border-radius: 8px;" onerror="this.src='assets/logo.png'">
+                </div>
+                <div>
+                    <h1 class="header-title" id="header-main-title">ศูนย์บริหารระบบและติดตามตลาดซื้อขาย (Admin Operations)</h1>
+                    <p class="header-subtitle" id="header-sub-title">ระบบจัดการซื้อขายนักฟุตบอล Football Transfer Intelligence • สัญญา & ดีล 3 ฝ่าย</p>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <!-- Sound Effects Toggle Button -->
+                <button type="button" class="btn-sound-toggle" onclick="toggleSound()" title="เปิด/ปิดเสียงคลิก">
+                    <span class="sound-toggle-icon">🔊</span> <span class="sound-toggle-label">เสียง: เปิด</span>
+                </button>
+
+                <!-- Staff Profile Pill -->
+                <div class="staff-profile-pill">
+                    <span class="staff-avatar">👤</span>
+                    <span class="staff-text"><span id="staff-title-text">ฝ่ายกำกับดูแลและสัญญา (Admin)</span> <strong id="staff-username">(admin)</strong></span>
+                    <span id="staff-role-badge" class="staff-role-tag">STAFF</span>
+                </div>
+
+                <!-- Red Outline Logout Button -->
+                <button type="button" class="btn-logout-danger" onclick="handleLogoutClick()">
+                    [→ ออกจากระบบ]
+                </button>
+            </div>
+        </header>
+
+        <!-- Floating Pill Navigation Bar (แถบเมนูแบบแคปซูลสีขาวตามรูป) -->
+        <div class="admin-nav-bar-container">
+            <nav class="admin-nav-pill-bar" id="admin-nav-pill-bar">
+                <button type="button" class="nav-pill-item active" data-tab="market" onclick="switchDashboardTab('market')">
+                    <span class="pill-icon">📄</span> <span id="nav-tab-label-market">ทำเนียบนักเตะ & ภาพรวม</span> <span class="badge-count orange" id="badge-count-players">56</span>
+                </button>
+                <button type="button" class="nav-pill-item" data-tab="offers" onclick="switchDashboardTab('offers')">
+                    <span class="pill-icon">✍️</span> <span id="nav-tab-label-offers">ตรวจสอบ & อนุมัติดีลซื้อขาย</span> <span class="badge-count blue" id="badge-count-offers">18/18</span>
+                </button>
+                <button type="button" class="nav-pill-item admin-only" data-tab="clubs" onclick="switchDashboardTab('clubs')">
+                    <span class="pill-icon">🏦</span> ตรวจสอบเอกสารสโมสร <span class="badge-count green" id="badge-count-clubs">9/9</span>
+                </button>
+                <button type="button" class="nav-pill-item" data-tab="squad" onclick="switchDashboardTab('squad')">
+                    <span class="pill-icon">⚽</span> <span id="nav-tab-label-squad">นักเตะในสังกัดสโมสร</span>
+                </button>
+                <button type="button" class="nav-pill-item" data-tab="history" onclick="switchDashboardTab('history')">
+                    <span class="pill-icon">⭐</span> จัดอันดับ & ประวัติซื้อขาย <span class="badge-count purple" id="badge-count-history">15</span>
+                </button>
+                <button type="button" class="nav-pill-item" id="nav-pill-agent-profile" onclick="openCurrentAgentProfile()">
+                    <span class="pill-icon">💼</span> <span id="nav-tab-label-agent">โปรไฟล์เอเยนต์</span>
+                </button>
+                <button type="button" class="nav-pill-item admin-only" data-tab="users" onclick="switchDashboardTab('users')">
+                    <span class="pill-icon">👥</span> จัดการบัญชีผู้ใช้งาน
+                </button>
+            </nav>
+        </div>
+
+        <main class="app-container" style="padding-top: 6px;">
+
+            <!-- TAB 1: PLAYER MARKET & OPERATIONS DASHBOARD -->
+            <section id="tab-market">
+
+                <!-- 1. ADMIN ONLY OPERATIONS DASHBOARD (แสดงเฉพาะผู้ดูแลระบบ Admin เท่านั้น) -->
+                <div id="admin-operations-overview" class="admin-only">
+                    <!-- 1.1 Row of 4 Large KPI Metric Cards (ตามรูปเป๊ะๆ) -->
+                    <div class="admin-kpi-row">
+                        <!-- Card 1 -->
+                        <div class="admin-kpi-card">
+                            <div class="kpi-main-info">
+                                <span class="kpi-main-title">นักฟุตบอลลงทะเบียนทั้งหมด</span>
+                                <div class="kpi-big-number" id="admin-kpi-total-players">56</div>
+                                <span class="kpi-sub-label" id="admin-kpi-sub-players">จาก 9 สโมสรชั้นนำ & เอเยนต์ทั่วโลก</span>
+                            </div>
+                            <div class="kpi-icon-circle bg-blue">👥</div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="admin-kpi-card">
+                            <div class="kpi-main-info">
+                                <span class="kpi-main-title">ดีลที่ปิดสำเร็จครบทุกขั้นตอน</span>
+                                <div class="kpi-big-number color-green">
+                                    <span id="admin-kpi-completed-deals">15</span>
+                                    <span class="kpi-percent-tag" id="admin-kpi-completed-pct">(68.2%)</span>
+                                </div>
+                                <span class="kpi-sub-label" id="admin-kpi-sub-deals">มูลค่าการซื้อขายรวมกว่า €1,240M</span>
+                            </div>
+                            <div class="kpi-icon-circle bg-green">✓</div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="admin-kpi-card">
+                            <div class="kpi-main-info">
+                                <span class="kpi-main-title">กำลังเจรจา & ร่างสัญญา</span>
+                                <div class="kpi-big-number color-amber" id="admin-kpi-active-deals">3</div>
+                                <span class="kpi-sub-label">อยู่ในขั้นตอนต่อรองค่าตัวและตรวจสัญญา</span>
+                            </div>
+                            <div class="kpi-icon-circle bg-amber">🕒</div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="admin-kpi-card">
+                            <div class="kpi-main-info">
+                                <span class="kpi-main-title">สโมสรรออนุมัติเอกสารการเงิน</span>
+                                <div class="kpi-big-number color-slate" id="admin-kpi-pending-clubs">1</div>
+                                <span class="kpi-sub-label">รอแอดมินตรวจสอบ Bank Guarantee</span>
+                            </div>
+                            <div class="kpi-icon-circle bg-slate">⚠️</div>
+                        </div>
+                    </div>
+
+                    <!-- 1.2 Positions Breakdown Card (แถบแยกตามตำแหน่งนักเตะในสนาม) -->
+                    <div class="breakdown-card">
+                        <div class="breakdown-title" id="breakdown-header-title">
+                            รายชื่อนักฟุตบอล 56 คน แยกตามตำแหน่งในสนาม
+                        </div>
+                        <div class="breakdown-pills-row">
+                            <div class="breakdown-pill-box">
+                                <span class="breakdown-pill-label">กองหน้า (FW)</span>
+                                <span class="breakdown-pill-count"><span id="count-pos-fw">18</span> <span>คน</span></span>
+                            </div>
+                            <div class="breakdown-pill-box">
+                                <span class="breakdown-pill-label">กองกลาง (MF)</span>
+                                <span class="breakdown-pill-count"><span id="count-pos-mf">20</span> <span>คน</span></span>
+                            </div>
+                            <div class="breakdown-pill-box">
+                                <span class="breakdown-pill-label">กองหลัง (DF)</span>
+                                <span class="breakdown-pill-count"><span id="count-pos-df">14</span> <span>คน</span></span>
+                            </div>
+                            <div class="breakdown-pill-box gray">
+                                <span class="breakdown-pill-label">ผู้รักษาประตู (GK)</span>
+                                <span class="breakdown-pill-count"><span id="count-pos-gk">4</span> <span>คน</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1.3 Process Progress Cards (ส่วนที่ 1, ส่วนที่ 2, ส่วนที่ 3) -->
+                    <div class="progress-stages-grid">
+                        <!-- Stage 1 -->
+                        <div class="stage-card">
+                            <div>
+                                <div class="stage-header">
+                                    <span class="stage-tag blue">ส่วนที่ 1 • STAGE 1</span>
+                                    <span class="stage-counter" id="stage1-count-text">18 / 22 ดีล</span>
+                                </div>
+                                <div class="stage-title">การเจรจาค่าตัว & เงื่อนไขสัญญา (Negotiation)</div>
+                                <div class="stage-progress-track">
+                                    <div class="stage-progress-fill blue" id="stage1-bar" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                            <div class="stage-footer">
+                                <span id="stage1-foot-left">ส่งข้อเสนอแล้ว 75%</span>
+                                <span id="stage1-foot-right">ยังเจรจาอยู่ 25%</span>
+                            </div>
+                        </div>
+
+                        <!-- Stage 2 -->
+                        <div class="stage-card">
+                            <div>
+                                <div class="stage-header">
+                                    <span class="stage-tag orange">ส่วนที่ 2 • STAGE 2</span>
+                                    <span class="stage-counter" id="stage2-count-text">16 / 18 สัญญา</span>
+                                </div>
+                                <div class="stage-title">การตรวจสัญญา & การแพทย์ (Contracts & Terms)</div>
+                                <div class="stage-progress-track">
+                                    <div class="stage-progress-fill orange" id="stage2-bar" style="width: 88.9%;"></div>
+                                </div>
+                            </div>
+                            <div class="stage-footer">
+                                <span id="stage2-foot-left">ร่างสัญญาครบ 88.9%</span>
+                                <span id="stage2-foot-right">รอลงนาม 11.1%</span>
+                            </div>
+                        </div>
+
+                        <!-- Stage 3 -->
+                        <div class="stage-card">
+                            <div>
+                                <div class="stage-header">
+                                    <span class="stage-tag pink">ส่วนที่ 3 • STAGE 3</span>
+                                    <span class="stage-counter" id="stage3-count-text">15 / 16 ดีล</span>
+                                </div>
+                                <div class="stage-title">อนุมัติปิดดีลขั้นสุดท้าย (Final Admin Approval)</div>
+                                <div class="stage-progress-track">
+                                    <div class="stage-progress-fill pink" id="stage3-bar" style="width: 93.8%;"></div>
+                                </div>
+                            </div>
+                            <div class="stage-footer">
+                                <span id="stage3-foot-left">อนุมัติเสร็จสมบูรณ์ 93.8%</span>
+                                <span id="stage3-foot-right">รอตราประทับ 6.2%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CLUB ONLY MARKET BANNER & STATS (แสดงเมื่อล็อกอินเป็นสโมสร Club) -->
+                <div id="club-market-banner" class="club-only club-market-card hidden">
+                    <div class="club-market-header-row">
+                        <div class="club-market-info-block">
+                            <div class="club-verified-pill">
+                                <span>🏟️</span>
+                                <span>สโมสรสมาชิกทางการ (Official Club)</span>
+                                <span class="club-status-active-dot">● พร้อมซื้อขาย</span>
+                            </div>
+                            <h2 class="club-market-headline">
+                                ตลาดซื้อขายนักฟุตบอล • <span id="club-banner-title-name">Real Madrid</span>
+                            </h2>
+                            <p class="club-market-description">
+                                ค้นหานักเตะระดับโลกจากสโมสรและเอเยนต์ชั้นนำ • ยื่นข้อเสนอซื้อตัว (Make Offer) • ติดตามผลการอนุมัติและสัญญาแบบ Real-Time
+                            </p>
+                        </div>
+                        <div class="club-market-quick-stats">
+                            <div class="club-stat-box budget">
+                                <div class="club-stat-box-label">💰 งบประมาณสโมสรคงเหลือ</div>
+                                <div class="club-stat-box-val" id="club-stat-budget">€150.0M</div>
+                                <div class="club-stat-box-sub">วงเงินที่ผ่านการอนุมัติ Bank Guarantee</div>
+                            </div>
+                            <div class="club-stat-box">
+                                <div class="club-stat-box-label">⚽ นักเตะในตลาดที่พร้อมดึงตัว</div>
+                                <div class="club-stat-box-val color-orange" id="club-stat-market-players">38 <span>คน</span></div>
+                                <div class="club-stat-box-sub" id="club-stat-market-sub">จากสโมสรอื่นทั่วโลก</div>
+                            </div>
+                            <div class="club-stat-box">
+                                <div class="club-stat-box-label">📋 ดีลที่สโมสรส่งข้อเสนอ</div>
+                                <div class="club-stat-box-val color-blue" id="club-stat-my-deals">2 <span>ดีล</span></div>
+                                <div class="club-stat-box-sub">คลิกแท็บ "ข้อเสนอซื้อขาย" เพื่อติดตาม</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. AGENT ONLY MARKET BANNER & STATS (แสดงเมื่อล็อกอินเป็นเอเยนต์ Agent) -->
+                <div id="agent-market-banner" class="agent-only agent-market-card hidden">
+                    <div class="club-market-header-row">
+                        <div class="club-market-info-block">
+                            <div class="club-verified-pill agent-badge">
+                                <span>💼</span>
+                                <span>เอเยนต์ผู้ดูแลนักเตะ (Certified Agency)</span>
+                                <span class="club-status-active-dot">● พร้อมเจรจา</span>
+                            </div>
+                            <h2 class="club-market-headline">
+                                ศูนย์ข้อมูลนักฟุตบอล & ตลาดซื้อขาย • <span id="agent-banner-title-name">Agent Portal</span>
+                            </h2>
+                            <p class="club-market-description">
+                                บริหารข้อมูล ประวัติ และวิดีโอไฮไลท์ของนักฟุตบอลในความดูแล • รับและพิจารณาข้อเสนอซื้อตัวจากทุกสโมสร
+                            </p>
+                        </div>
+                        <div class="club-market-quick-stats">
+                            <div class="club-stat-box">
+                                <div class="club-stat-box-label">👥 นักเตะในความดูแล</div>
+                                <div class="club-stat-box-val color-blue" id="agent-stat-players-count">12 <span>คน</span></div>
+                                <div class="club-stat-box-sub">พร้อมเพิ่มนักเตะใหม่เข้าสู่ตลาด</div>
+                            </div>
+                            <div class="club-stat-box">
+                                <div class="club-stat-box-label">📩 ข้อเสนอที่รอการตอบรับ</div>
+                                <div class="club-stat-box-val color-orange" id="agent-stat-pending-offers">3 <span>ข้อเสนอ</span></div>
+                                <div class="club-stat-box-sub">รอพิจารณาเงื่อนไขสัญญา & ค่าเหนื่อย</div>
+                            </div>
+                            <div class="club-stat-box">
+                                <div class="club-stat-box-label">⭐ นักเตะที่ปิดดีลสำเร็จ</div>
+                                <div class="club-stat-box-val color-green" id="agent-stat-completed-deals">5 <span>คน</span></div>
+                                <div class="club-stat-box-sub">ย้ายสู่สโมสรใหม่เรียบร้อยแล้ว</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Filter & Action Bar (แถบปุ่มตัวกรอง + ค้นหา + ปุ่มเขียว Export CSV) -->
+                <div class="admin-action-bar">
+                    <!-- Filter Pills for Admin -->
+                    <div class="filter-pills-row admin-only" id="admin-filter-pills">
+                        <button type="button" class="btn-status-filter-pill active" onclick="setAdminStatusFilter('ALL')">
+                            ทั้งหมด (<span id="pill-count-all">56</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('AVAILABLE')">
+                            พร้อมย้ายทีม (<span id="pill-count-avail">38</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('NEGOTIATING')">
+                            กำลังเจรจา (<span id="pill-count-neg">12</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('COMPLETED')">
+                            ปิดดีลแล้ว (<span id="pill-count-comp">15</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('PENDING_CLUB')">
+                            สโมสรรออนุมัติ (<span id="pill-count-pending">1</span>)
+                        </button>
+                    </div>
+
+                    <!-- Filter Pills for Club -->
+                    <div class="filter-pills-row club-only hidden" id="club-filter-pills">
+                        <button type="button" class="btn-status-filter-pill active" onclick="setAdminStatusFilter('ALL')">
+                            นักเตะทั้งหมดในตลาด (<span id="club-pill-all">38</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('AVAILABLE')">
+                            พร้อมเจรจาย้ายทีม (<span id="club-pill-avail">38</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('NEGOTIATING')">
+                            กำลังเจรจา (<span id="club-pill-neg">3</span>)
+                        </button>
+                    </div>
+
+                    <!-- Filter Pills for Agent -->
+                    <div class="filter-pills-row agent-only hidden" id="agent-filter-pills">
+                        <button type="button" class="btn-status-filter-pill active" onclick="setAdminStatusFilter('ALL')">
+                            นักเตะทั้งหมด (<span id="agent-pill-all">56</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('AVAILABLE')">
+                            พร้อมย้ายทีม (<span id="agent-pill-avail">38</span>)
+                        </button>
+                        <button type="button" class="btn-status-filter-pill" onclick="setAdminStatusFilter('NEGOTIATING')">
+                            กำลังเจรจา (<span id="agent-pill-neg">12</span>)
+                        </button>
+                    </div>
+
+                    <div class="admin-search-wrapper">
+                        <input type="text" id="admin-search-box" class="admin-search-input" placeholder="🔍 ค้นหาด้วย รหัส, ชื่อนักเตะ, สโมสร, สัญชาติ, เอเยนต์..." oninput="handleAdminSearchInput(this.value)">
+                    </div>
+
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <select id="market-my-club-select" onchange="handleMyClubChange(this.value)" style="height: 38px; border-radius: 999px; border: 1px solid #CBD5E1; padding: 0 14px; font-size: 12px; font-weight: 600; background: #F8FAFC;">
+                            <option value="Real Madrid">🏳️ Real Madrid</option>
+                        </select>
+                        <select id="filter-club" onchange="renderPlayersGrid()" style="height: 38px; border-radius: 999px; border: 1px solid #CBD5E1; padding: 0 14px; font-size: 12px; font-weight: 500; background: #F8FAFC;">
+                            <option value="ALL">🏟️ ทุกสโมสร</option>
+                        </select>
+                        <select id="filter-pos" onchange="renderPlayersGrid()" style="height: 38px; border-radius: 999px; border: 1px solid #CBD5E1; padding: 0 14px; font-size: 12px; font-weight: 500; background: #F8FAFC;">
+                            <option value="ALL">🎯 ทุกตำแหน่ง</option>
+                            <option value="ST">ST (กองหน้า)</option>
+                            <option value="LW">LW (ปีกซ้าย)</option>
+                            <option value="RW">RW (ปีกขวา)</option>
+                            <option value="CAM">CAM (กลางรุก)</option>
+                            <option value="CM">CM (กองกลาง)</option>
+                            <option value="CDM">CDM (กลางรับ)</option>
+                            <option value="CB">CB (เซ็นเตอร์แบ็ก)</option>
+                            <option value="LB">LB (แบ็กซ้าย)</option>
+                            <option value="RB">RB (แบ็กขวา)</option>
+                            <option value="GK">GK (ผู้รักษาประตู)</option>
+                        </select>
+                        <button type="button" id="btn-open-add-player" class="btn-sm btn-blue" style="border-radius: 999px; padding: 0 16px; height: 38px;" onclick="openPlayerForm()">
+                            ➕ เพิ่มนักเตะใหม่
+                        </button>
+                        <button type="button" class="btn-export-spreadsheet admin-only" onclick="exportSpreadsheetCSV()">
+                            📥 ส่งออกไฟล์ Spreadsheet (.CSV)
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <!-- In-Page Player Add/Edit Panel -->
+                <div id="player-form-panel" class="data-card hidden" style="border: 2px solid #1B9AE5;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h3 id="player-form-title" style="font-size: 17px; font-weight: 700;">⚽ เพิ่ม/แก้ไขข้อมูลนักเตะ</h3>
+                        <button type="button" class="btn-back-page" onclick="closePlayerForm()">✖ ปิดฟอร์ม</button>
+                    </div>
+                    <form id="player-crud-form" onsubmit="handlePlayerSave(event)">
+                        <input type="hidden" id="edit-player-id" value="">
+                        <div class="register-grid">
+                            <div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>ชื่อจริง (First Name)</label>
+                                        <input type="text" id="p-first-name" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>ชื่อในวงการ (Known As)</label>
+                                        <input type="text" id="p-known-as" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>สัญชาติ (Nationality)</label>
+                                        <input type="text" id="p-nationality" class="form-control" value="Spain" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>ตำแหน่งหลัก (Position)</label>
+                                        <select id="p-position" class="form-control">
+                                            <option value="ST">ST</option>
+                                            <option value="LW">LW</option>
+                                            <option value="RW">RW</option>
+                                            <option value="CAM">CAM</option>
+                                            <option value="CM">CM</option>
+                                            <option value="CDM">CDM</option>
+                                            <option value="CB">CB</option>
+                                            <option value="LB">LB</option>
+                                            <option value="RB">RB</option>
+                                            <option value="GK">GK</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>สโมสรปัจจุบัน (Current Club)</label>
+                                        <select id="p-club" class="form-control" required></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>📌 สถานะความพร้อม (Player Availability)</label>
+                                        <select id="p-availability" class="form-control">
+                                            <option value="พร้อมย้ายทีม (Available)">พร้อมย้ายทีม (Available)</option>
+                                            <option value="กำลังเจรจา (Negotiating)">กำลังเจรจา (Negotiating)</option>
+                                            <option value="ไม่พร้อมย้ายทีม (Not Available)">ไม่พร้อมย้ายทีม (Not Available)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-top: 6px;">
+                                    <label style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>💼 เอเยนต์ผู้ดูแลสัญญา (Managing Agent)</span>
+                                        <span class="admin-only" style="color: #EA580C; font-size: 11px; font-weight: 700;">★ แอดมินสามารถเปลี่ยนย้ายสังกัดเอเยนต์ได้</span>
+                                    </label>
+                                    <select id="p-agent" class="form-control" style="font-weight: 600;"></select>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>ค่าพลัง (Overall Rating)</label>
+                                        <input type="number" id="p-ovr" class="form-control" value="84" min="40" max="99" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>ศักยภาพ (Potential)</label>
+                                        <input type="number" id="p-pot" class="form-control" value="88" min="40" max="99" required>
+                                    </div>
+                                </div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>มูลค่าประเมิน (€)</label>
+                                        <input type="number" id="p-value" class="form-control" value="45000000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>ราคาตั้งขาย (€)</label>
+                                        <input type="number" id="p-asking" class="form-control" value="55000000" required>
+                                    </div>
+                                </div>
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label>📸 รูปภาพที่ 1: รูปโปรไฟล์ (Profile Portrait)</label>
+                                        <input type="file" id="p-image-file" class="form-control" style="padding-top: 6px;" accept="image/*">
+                                        <div id="p-image-preview-box" class="hidden" style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                                            <img id="p-image-preview-img" src="" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1.5px solid #EA580C;">
+                                            <span style="font-size: 11.5px; color: #16A34A; font-weight: 600;">✓ รูปโปรไฟล์พร้อมบันทึก</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>⚡ รูปภาพที่ 2: รูปแข่งขัน/ในสนาม (Action Shot)</label>
+                                        <input type="file" id="p-image-file-2" class="form-control" style="padding-top: 6px;" accept="image/*">
+                                        <div id="p-image-preview-box-2" class="hidden" style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+                                            <img id="p-image-preview-img-2" src="" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1.5px solid #EA580C;">
+                                            <span style="font-size: 11.5px; color: #16A34A; font-weight: 600;">✓ รูปแข่งขันพร้อมบันทึก</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>🎬 อัปโหลดวิดีโอไฮไลท์ (.mp4/.webm)</label>
+                                    <input type="file" id="p-video-file" class="form-control" style="padding-top: 6px;" accept="video/*">
+                                </div>
+                                <button type="submit" class="btn-primary-full" style="margin-top: 6px;">💾 บันทึกข้อมูลนักเตะ</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- In-Page Player Detail & Video Showcase Panel (เปิดข้อมูลนักเตะพร้อมวิดีโอและสไลด์รูปภาพ - Theme: Deep Black + Vibrant Orange) -->
+                <div id="player-detail-panel" class="player-detail-card hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1.5px solid rgba(255, 102, 0, 0.4); padding-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 26px;">🎬</span>
+                            <div>
+                                <h3 id="detail-player-title" style="font-size: 20px; font-weight: 800; color: #FFFFFF;">ข้อมูลนักฟุตบอล & วิดีโอไฮไลท์</h3>
+                                <p id="detail-player-subtitle" style="font-size: 13px; color: #94A3B8;">สไลด์ดูรูปภาพตัวจริง สัดส่วนรูปร่าง และวิดีโอฟอร์มการเล่นจริง</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="carousel-arrow-btn" style="width: 34px; height: 34px; font-size: 14px; background: rgba(255, 102, 0, 0.14); color: #FF6600; border: 1.5px solid #FF6600;" onclick="slideDetailPlayer(-1)" title="ดูนักเตะคนก่อนหน้า">❮</button>
+                            <button type="button" class="carousel-arrow-btn" style="width: 34px; height: 34px; font-size: 14px; background: rgba(255, 102, 0, 0.14); color: #FF6600; border: 1.5px solid #FF6600;" onclick="slideDetailPlayer(1)" title="ดูนักเตะคนถัดไป">❯</button>
+                            <button type="button" class="btn-back-page" style="background: rgba(255, 102, 0, 0.14); color: #FF6600; border: 1.5px solid #FF6600;" onclick="closePlayerDetail()">✖ ปิดหน้าต่างข้อมูล</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid">
+                        <!-- Left: Multi-Photo Slider & Player Physique Profile -->
+                        <div style="background: #0F172A; border: 1.5px solid rgba(255, 102, 0, 0.35); border-radius: 18px; padding: 18px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+                            <!-- Interactive Multi-Photo Slider inside Detail Panel -->
+                            <div class="photo-slider-box" style="padding: 10px; margin-bottom: 12px; background: #090D16; border: 1px solid rgba(255, 102, 0, 0.35); border-radius: 14px;">
+                                <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-size: 12px; font-weight: 700; color: #FB923C;">📸 เลื่อนดูรูปภาพ & รูปร่างจริง</span>
+                                    <span id="detail-photo-counter" style="font-size: 11px; color: #94A3B8; font-weight: 600;">1/2</span>
+                                </div>
+                                <div class="photo-slider-viewport">
+                                    <span id="detail-stage-watermark" class="stage-watermark">FOOTBALL</span>
+                                    <button type="button" class="photo-slide-arrow prev" style="background: rgba(11, 15, 25, 0.72); color: #FFFFFF;" onclick="slideDetailPhoto(-1)" title="รูปก่อนหน้า">❮</button>
+                                    <img id="detail-player-img" src="/assets/players/player_1.png" alt="Player" onerror="this.src='/assets/players/player_1.png'">
+                                    <button type="button" class="photo-slide-arrow next" style="background: rgba(11, 15, 25, 0.72); color: #FFFFFF;" onclick="slideDetailPhoto(1)" title="รูปถัดไป">❯</button>
+                                </div>
+                                <div id="detail-photo-dots" class="photo-slider-dots"></div>
+                                <div id="detail-photo-caption" class="photo-caption-tag" style="background: rgba(255, 102, 0, 0.14); color: #FB923C; border: 1px solid rgba(255, 102, 0, 0.4);">ภาพถ่ายตัวจริงของนักฟุตบอล</div>
+                                <div id="detail-photo-quick-tabs" style="display: flex; gap: 6px; justify-content: center; margin-top: 8px;">
+                                    <button type="button" class="btn-photo-tab active" id="btn-tab-photo-1" onclick="setDetailPhoto(0)">👤 รูป 1: โปรไฟล์</button>
+                                    <button type="button" class="btn-photo-tab" id="btn-tab-photo-2" onclick="setDetailPhoto(1)">⚡ รูป 2: ในสนาม</button>
+                                </div>
+                            </div>
+
+                            <span id="detail-player-pos" class="player-pos-badge" style="background: linear-gradient(135deg, #FF6600 0%, #EA580C 100%); color: #FFFFFF; font-weight: 800; box-shadow: 0 4px 14px rgba(255, 102, 0, 0.4);">ST</span>
+                            <h2 id="detail-player-name" style="font-size: 21px; font-weight: 800; color: #FFFFFF; margin: 6px 0 2px;">-</h2>
+                            <div id="detail-player-club" style="font-size: 13px; color: #CBD5E1; margin-bottom: 10px; font-weight: 500;">-</div>
+
+                            <!-- Physique Stats Grid -->
+                            <div class="physique-badges-grid" style="margin: 10px 0;">
+                                <div class="physique-stat-item" style="padding: 7px; background: #090D16; border: 1px solid rgba(255, 102, 0, 0.35); border-radius: 10px;">
+                                    <span class="physique-stat-label" style="color: #94A3B8;">📏 ส่วนสูง</span>
+                                    <span id="detail-player-height" class="physique-stat-val" style="font-size: 13px; color: #FFFFFF; font-weight: 700;">180 cm</span>
+                                </div>
+                                <div class="physique-stat-item" style="padding: 7px; background: #090D16; border: 1px solid rgba(255, 102, 0, 0.35); border-radius: 10px;">
+                                    <span class="physique-stat-label" style="color: #94A3B8;">⚖️ น้ำหนัก</span>
+                                    <span id="detail-player-weight" class="physique-stat-val" style="font-size: 13px; color: #FFFFFF; font-weight: 700;">75 kg</span>
+                                </div>
+                                <div class="physique-stat-item" style="padding: 7px; background: #090D16; border: 1px solid rgba(255, 102, 0, 0.35); border-radius: 10px;">
+                                    <span class="physique-stat-label" style="color: #94A3B8;">🦶 เท้าที่ถนัด</span>
+                                    <span id="detail-player-foot" class="physique-stat-val" style="font-size: 12px; color: #FB923C; font-weight: 700;">ขวา</span>
+                                </div>
+                            </div>
+
+                            <div id="detail-player-body" class="body-type-banner" style="text-align: left; font-size: 12px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255, 102, 0, 0.12); border: 1px solid rgba(255, 102, 0, 0.35); border-left: 4px solid #FF6600; color: #FFEDD5; border-radius: 10px; font-weight: 600;">
+                                สมส่วน แข็งแกร่ง (Athletic Build)
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #090D16; border: 1px solid rgba(255, 102, 0, 0.35); padding: 10px; border-radius: 12px; margin-bottom: 12px; font-size: 12px;">
+                                <div><span style="color:#94A3B8;">Overall:</span> <strong id="detail-player-ovr" style="color:#FF6600; font-size:16px; font-weight:800;">-</strong></div>
+                                <div><span style="color:#94A3B8;">Potential:</span> <strong id="detail-player-pot" style="color:#10B981; font-size:16px; font-weight:800;">-</strong></div>
+                                <div><span style="color:#94A3B8;">สัญชาติ:</span> <strong id="detail-player-nat" style="color:#FFFFFF;">-</strong></div>
+                                <div><span style="color:#94A3B8;">สถานะ:</span> <strong style="color:#10B981;">Approved</strong></div>
+                                <div style="grid-column: 1 / -1; border-top: 1px dashed rgba(255, 102, 0, 0.25); padding-top: 6px; text-align: left; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                                    <span style="color:#94A3B8;">💼 เอเยนต์ผู้ดูแล:</span>
+                                    <button type="button" id="detail-player-agent-btn" onclick="openAgentProfile(currentDetailAgentId)" style="background: rgba(255, 102, 0, 0.15); border: 1px solid #FF6600; color: #FFEDD5; border-radius: 999px; padding: 4px 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; max-width: 100%; word-break: break-all;" title="คลิกเพื่อดูโปรไฟล์เอเยนต์">
+                                        <span id="detail-player-agent">-</span> ↗
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="detail-player-price" style="font-size: 22px; font-weight: 900; color: #FF6600; margin-bottom: 12px; text-shadow: 0 0 16px rgba(255, 102, 0, 0.4);">€0</div>
+                            <div id="detail-role-actions" style="display: flex; gap: 8px; justify-content: center;"></div>
+                        </div>
+
+                        <!-- Right: Highlight Video Player + Agent Upload & Admin Download -->
+                        <div class="video-stage-box" style="background: #0F172A; border: 1.5px solid rgba(255, 102, 0, 0.35); border-radius: 18px; padding: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                                <div style="font-size: 14px; font-weight: 700; color: #FFFFFF;">
+                                    🎥 วิดีโอไฮไลท์ฟอร์มการเล่น (Player Highlight Video)
+                                </div>
+                                <div id="detail-video-badge" style="font-size: 12px; color: #FB923C; font-weight: 600;"></div>
+                            </div>
+
+                            <!-- HTML5 Video Player -->
+                            <video id="detail-video-player" class="video-player-element" style="border: 1.5px solid rgba(255, 102, 0, 0.45); background: #070A11;" controls playsinline></video>
+
+                            <!-- Interactive Tactical Highlight Canvas (Fallback / Generator when no video uploaded yet) -->
+                            <canvas id="detail-video-canvas" width="640" height="300" class="video-player-element hidden" style="border: 1.5px solid rgba(255, 102, 0, 0.45); background: #070A11;"></canvas>
+
+                            <!-- Action Bar: Upload (Agent/Admin) & Download (Admin/All) -->
+                            <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; background: #090D16; border: 1px solid rgba(255, 102, 0, 0.35); padding: 12px 14px; border-radius: 14px;">
+                                <!-- Upload Controls for Agent & Admin -->
+                                <div id="detail-upload-controls" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label class="btn-sm" style="flex: none; padding: 7px 16px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: linear-gradient(135deg, #FF6600 0%, #EA580C 100%); color: #FFFFFF; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 12px rgba(255, 102, 0, 0.35);">
+                                        📤 อัปโหลดวิดีโอไฮไลท์ (Agent/Admin)
+                                        <input type="file" id="detail-video-upload-input" style="display: none;" accept="video/*" onchange="handleDirectVideoUpload(this)">
+                                    </label>
+                                    <button type="button" class="btn-sm" style="flex: none; padding: 7px 14px; background: rgba(255, 102, 0, 0.12); color: #FFEDD5; border: 1px solid #FF6600; font-weight: 600; border-radius: 8px;" onclick="generateAndUploadHighlightVideo()">
+                                        ⚡ สร้างวิดีโอไฮไลท์อัตโนมัติ
+                                    </button>
+                                </div>
+
+                                <!-- Download Control for Admin (& Users) -->
+                                <div id="detail-download-controls" style="display: flex; gap: 8px; align-items: center;">
+                                    <a id="btn-download-video" href="#" download class="btn-sm btn-green" style="flex: none; padding: 7px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; border-radius: 8px;">
+                                        ⬇️ ดาวน์โหลดวิดีโอ (Admin Download)
+                                    </a>
+                                </div>
+                            </div>
+                            <div id="detail-video-status-msg" style="margin-top: 8px; font-size: 12px; color: #10B981; font-weight: 600;" class="hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In-Page Make Offer Panel (For Clubs) -->
+                <div id="offer-form-panel" class="data-card hidden" style="border: 2px solid #10B981;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 id="offer-panel-title" style="font-size: 17px; font-weight: 700;">💰 ยื่นข้อเสนอขอซื้อตัวนักเตะ (พร้อมส่งอีเมลแจ้งเตือนจริง)</h3>
+                        <button type="button" class="btn-back-page" onclick="closeOfferForm()">✖ ปิด</button>
+                    </div>
+                    <form onsubmit="handleSendOffer(event)">
+                        <input type="hidden" id="offer-player-id">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>จำนวนเงินค่าตัวที่เสนอซื้อ (€ ยูโร)</label>
+                                <input type="number" id="offer-amount" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ค่าเหนื่อยที่เสนอให้นักเตะ (€ ต่อสัปดาห์)</label>
+                                <input type="number" id="offer-wage" class="form-control" value="180000" required>
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>ระยะเวลาสัญญาที่เสนอ (Contract Years)</label>
+                                <select id="offer-years" class="form-control">
+                                    <option value="2">2 ปี</option>
+                                    <option value="3">3 ปี</option>
+                                    <option value="4" selected>4 ปี</option>
+                                    <option value="5">5 ปี</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>📧 อีเมลผู้รับจริงสำหรับแจ้งผลดีลซื้อขาย (คั่นด้วย ,)</label>
+                                <input type="text" id="offer-contact-email" class="form-control" placeholder="เช่น yourname@gmail.com, transfers@realmadrid.com" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary-full" style="background: #10B981;">🚀 ยืนยันการส่งข้อเสนอซื้อตัว (สถานะเริ่มต้น: Pending รอเอเยนต์พิจารณา)</button>
+                    </form>
+                </div>
+
+                <!-- Players Grid -->
+                <div id="players-grid" class="players-grid"></div>
+            </section>
+
+            <!-- TAB 2: TRANSFER OFFERS (SINGLE-CLUB SCOPED + REAL EMAILS + GOOGLE DRIVE IMPORT) -->
+            <section id="tab-offers" class="hidden">
+                <!-- 1. Single-Club Scoped Transfer Deals Table -->
+                <div class="data-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+                        <div>
+                            <h3 id="offers-section-title" style="font-size: 18px; font-weight: 700; color: #0F172A; margin: 0;">
+                                🤝 รายการซื้อขายนักฟุตบอลสโมสรที่เกี่ยวข้อง
+                            </h3>
+                        </div>
+
+                        <!-- สำหรับ Admin / Agent เลือกดูสโมสร (เช่น Real Madrid) หรือดูของสโมสรที่ล็อกอิน -->
+                        <div id="offer-club-scope-box" style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #334155;">🏟️ สโมสร:</label>
+                            <select id="offer-club-scope-select" class="form-control" style="width: 220px; height: 38px;" onchange="renderOffersTable()">
+                                <option value="Real Madrid">⚪ Real Madrid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>รหัสดีล</th>
+                                <th>นักฟุตบอล</th>
+                                <th>สโมสรผู้ซื้อ (Buying Club)</th>
+                                <th>สโมสรต้นสังกัด/ผู้ขาย (Selling Club)</th>
+                                <th>ค่าตัว & ค่าเหนื่อย</th>
+                                <th>📧 อีเมลติดต่อจริง</th>
+                                <th>สถานะดีล (9 สถานะมาตรฐาน)</th>
+                                <th>ขั้นตอนการเจรจา / สัญญา / อนุมัติ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="offers-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- In-Page Multi-Round Negotiation & Contract Panel (Steps 04-07) -->
+                <div id="negotiation-panel" class="data-card hidden" style="border: 2px solid #0071E3; background: #F8FAFC;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <h3 id="neg-panel-title" style="font-size: 17px; font-weight: 700; color: #0F172A;">💬 ประวัติการต่อรองแต่ละรอบ & เงื่อนไขสัญญา (Negotiations & Contracts)</h3>
+                            <p id="neg-panel-subtitle" style="font-size: 12px; color: #475569; margin: 2px 0 0;"></p>
+                        </div>
+                        <button type="button" class="btn-back-page" onclick="closeNegotiationPanel()">✖ ปิดหน้าต่างเจรจา</button>
+                    </div>
+
+                    <div id="neg-rounds-list" style="margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div id="neg-contract-box" style="margin-bottom: 14px;"></div>
+
+                    <form onsubmit="handleSubmitCounterOffer(event)" style="background: #FFFFFF; padding: 14px; border-radius: 14px; border: 1px solid #E2E8F0;">
+                        <input type="hidden" id="neg-offer-id">
+                        <div style="font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #0F172A;">✍️ ยื่นข้อเสนอต่อรองใหม่ (Counter-Offer ➔ สถานะ Negotiating)</div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>ค่าตัวที่เสนอใหม่ (€)</label>
+                                <input type="number" id="neg-fee-input" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>ค่าเหนื่อยที่เสนอใหม่ (€/สัปดาห์)</label>
+                                <input type="number" id="neg-wage-input" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>ระยะเวลาสัญญา (ปี)</label>
+                                <input type="number" id="neg-years-input" class="form-control" value="4" min="1" max="8" required>
+                            </div>
+                            <div class="form-group">
+                                <label>หมายเหตุ / เงื่อนไขการเจรจา</label>
+                                <input type="text" id="neg-notes-input" class="form-control" placeholder="ระบุเหตุผลหรือเงื่อนไขสัญญาเพิ่มเติม...">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="submit" class="btn-sm btn-blue" style="height: 38px; padding: 0 18px;">💬 ส่งราคาต่อรองใหม่ (Negotiating)</button>
+                            <button type="button" class="btn-sm btn-green" style="height: 38px; padding: 0 18px;" onclick="triggerNegotiationAction('accept', this)">✅ ยอมรับข้อเสนอ (Accepted)</button>
+                            <button type="button" class="btn-sm" style="height: 38px; padding: 0 18px; background:#8E44AD; color:#FFF;" onclick="triggerNegotiationAction('confirm_contract', this)">📝 ยืนยันสัญญาส่งแอดมิน (Pending Approval)</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. Real Email List Dispatcher -->
+                <div style="margin-bottom: 22px;">
+                    <!-- Send to Real Email List -->
+                    <div class="data-card" style="margin-bottom: 0; border-top: 4px solid #1B9AE5;">
+                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">📧 ส่งอีเมลแจ้งข้อมูลซื้อขายไปยังรายชื่ออีเมลจริง (Real Email Notification)</h3>
+                        <p style="font-size: 12px; color: #64748B; margin-bottom: 12px;">
+                            กรอกรายชื่ออีเมลจริง (คั่นด้วยลูกน้ำ <code>,</code> หรือขึ้นบรรทัดใหม่) เพื่อส่งรายงานการซื้อขายและรายชื่อนักเตะของสโมสรที่เลือก
+                        </p>
+
+                        <form onsubmit="handleSendRealEmails(event)">
+                            <div class="form-group">
+                                <label>รายชื่ออีเมลผู้รับจริง (ใส่ได้หลายอีเมล คั่นด้วย ,)</label>
+                                <textarea id="bulk-real-emails" class="form-control" rows="2" style="height: 62px; padding: 8px 12px;" placeholder="เช่น user1@gmail.com, user2@gmail.com, transfers@realmadrid.com" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>ข้อความเพิ่มเติมในอีเมล (ถ้ามี)</label>
+                                <input type="text" id="bulk-custom-msg" class="form-control" placeholder="เช่น ส่งรายชื่อนักเตะและสรุปดีลซื้อขายของสโมสร Real Madrid">
+                            </div>
+
+                            <!-- Optional Gmail SMTP Config -->
+                            <details style="margin-bottom: 12px; background: #F8FAFC; padding: 10px 12px; border-radius: 12px; border: 1px solid #E2E8F0; font-size: 12px;">
+                                <summary style="cursor: pointer; font-weight: 600; color: #1E293B;">⚙️ ตั้งค่า SMTP สำหรับส่งเข้า Gmail จริงโดยตรง (ไม่บังคับ)</summary>
+                                <div class="form-row-2" style="margin-top: 10px;">
+                                    <div class="form-group" style="margin-bottom: 4px;">
+                                        <label>อีเมลผู้ส่ง (Gmail / SMTP User)</label>
+                                        <input type="email" id="smtp-user-input" class="form-control" placeholder="your_email@gmail.com">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 4px;">
+                                        <label>รหัสผ่านแอป (Gmail App Password 16 หลัก)</label>
+                                        <input type="password" id="smtp-pass-input" class="form-control" placeholder="xxxx xxxx xxxx xxxx">
+                                    </div>
+                                </div>
+                            </details>
+
+                            <div id="bulk-email-status" class="hidden" style="font-size: 13px; font-weight: 600; margin-bottom: 8px;"></div>
+                            <button type="submit" class="btn-primary-full">🚀 ส่งอีเมลไปยังรายชื่ออีเมลจริงทันที</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 3. Sent Emails History for Current Club / Testing -->
+                <div class="data-card">
+                    <h3 style="margin-bottom: 12px; font-size: 16px;">✉️ ประวัติการส่งอีเมลแจ้งเตือนดีลซื้อขายและรายชื่ออีเมลจริงล่าสุด</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>เวลาที่ส่ง</th>
+                                <th>สโมสร / ผู้รับ</th>
+                                <th>อีเมลผู้รับจริง</th>
+                                <th>หัวข้ออีเมล</th>
+                                <th>สถานะการส่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="club-emails-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 2.5: MY SQUAD / MY PLAYERS (นักเตะในสังกัดของสโมสรหรือเอเยนต์ - แสดงแยกรายสโมสรสำหรับ Admin) -->
+            <section id="tab-squad" class="hidden">
+                <!-- A. ADMIN ONLY: CLUBS DIRECTORY GRID (หน้าแอดมินแสดงเป็นแต่ละสโมสรตามรูปที่ 4) -->
+                <div id="admin-squad-clubs-panel" class="data-card admin-only hidden" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid #FED7AA; padding-bottom: 12px;">
+                        <div>
+                            <h3 style="font-size: 19px; font-weight: 800; color: #0F172A; margin: 0;">
+                                🏟️ ทำเนียบสโมสรฟุตบอลและนักเตะในสังกัด (Clubs & Squads Oversight)
+                            </h3>
+                            <p style="font-size: 13px; color: #64748B; margin: 3px 0 0;">
+                                คลิกเลือกสโมสรที่ต้องการตรวจสอบเพื่อดูรายชื่อนักเตะในสังกัด และแก้ไขข้อมูลนักเตะได้ทันที
+                            </p>
+                        </div>
+                        <div>
+                            <input type="text" id="admin-squad-club-search" class="admin-search-input" style="width: 250px; height: 38px;" placeholder="🔍 ค้นหาชื่อสโมสร..." oninput="renderAdminSquadClubsGrid()">
+                        </div>
+                    </div>
+
+                    <!-- Grid of Club Cards -->
+                    <div id="admin-squad-clubs-grid" class="admin-squad-clubs-grid"></div>
+                </div>
+
+                <!-- B. SQUAD ROSTER PANEL (แสดงการ์ดนักเตะของสโมสรที่เลือก พร้อมตัวเลือกสลับเป็นตาราง) -->
+                <div id="squad-roster-panel" class="data-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid #FED7AA; padding-bottom: 14px;">
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <button type="button" id="btn-back-to-clubs" class="btn-sm admin-only hidden" style="background: #FFF7ED; color: #EA580C; border: 1.5px solid #FED7AA; height: 38px; padding: 0 16px; border-radius: 999px; font-weight: 700; cursor: pointer;" onclick="scrollToSquadClubs()">
+                                ⬆ กลับสู่รายชื่อสโมสรทั้งหมด
+                            </button>
+                            <div>
+                                <h3 id="squad-section-title" style="font-size: 19px; font-weight: 800; color: #0F172A; margin: 0;">⚽ การ์ดนักฟุตบอลในสังกัด</h3>
+                                <p id="squad-section-subtitle" style="font-size: 12.5px; color: #64748B; margin: 2px 0 0;">คลิกที่การ์ดนักเตะเพื่อดูโปรไฟล์และวิดีโอไฮไลท์ในหน้านี้ได้ทันที</p>
+                            </div>
+                        </div>
+
+                        <!-- Switcher & View Toggle -->
+                        <div id="squad-club-switcher-box" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div class="squad-view-toggle" style="display: inline-flex; align-items: center; background: #FFF7ED; border: 1.5px solid #FED7AA; border-radius: 999px; padding: 3px; gap: 4px;">
+                                <button type="button" id="btn-squad-view-cards" class="squad-toggle-btn active" onclick="setSquadViewMode('cards')">🎴 การ์ด</button>
+                                <button type="button" id="btn-squad-view-table" class="squad-toggle-btn" onclick="setSquadViewMode('table')">📋 ตาราง</button>
+                            </div>
+                            <div class="admin-only" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <label style="font-size: 13px; font-weight: 600; color: #334155;">สลับสโมสร:</label>
+                                <select id="squad-club-select" class="form-control" style="width: 190px; height: 38px; border-radius: 999px; font-weight: 600;" onchange="handleSquadClubChange(this.value)"></select>
+                            </div>
+                            <button type="button" id="btn-squad-upload-logo" class="btn-sm btn-gray club-or-admin-btn hidden" style="height: 38px; border-radius: 999px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; color: #0F172A; font-weight: 700;" onclick="openClubLogoModal()" title="อัปเดตโลโก้สโมสร">
+                                🛡️ โลโก้สโมสร
+                            </button>
+                            <button type="button" id="btn-squad-add-player" class="btn-sm btn-blue club-or-admin-btn" style="height: 38px; border-radius: 999px; padding: 0 16px;" onclick="openPlayerFormForCurrentSquad()">
+                                ➕ เพิ่มนักเตะเข้าสโมสรนี้
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 1. Squad Cards Grid (เปลี่ยนจากตารางเป็นกาดตามคำขอของผู้ใช้) -->
+                    <div id="squad-cards-grid" class="players-grid"></div>
+
+                    <!-- 2. Squad Table Container (สำรองสำหรับโหมดตาราง) -->
+                    <div id="squad-table-container" class="hidden" style="overflow-x: auto; margin-top: 10px;">
+                        <table class="data-table" id="squad-table">
+                            <thead>
+                                <tr>
+                                    <th>รหัส</th>
+                                    <th>ชื่อนักเตะ</th>
+                                    <th>ตำแหน่ง</th>
+                                    <th>สัญชาติ</th>
+                                    <th>สังกัดสโมสรปัจจุบัน</th>
+                                    <th>ค่าพลัง (OVR)</th>
+                                    <th>มูลค่าประเมิน (€)</th>
+                                    <th>สถานะความพร้อมย้ายทีม</th>
+                                    <th>การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="squad-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2.6: TRANSFER HISTORY (ประวัติการซื้อขายสำเร็จและประวัติข้อเสนอ) -->
+            <section id="tab-history" class="hidden">
+                <div class="data-card">
+                    <h3 style="font-size: 18px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">🏆 ประวัติการซื้อขายนักฟุตบอลที่ปิดดีลสำเร็จ (Completed Transfer History)</h3>
+                    <p style="font-size: 13px; color: #64748B; margin-bottom: 14px;">บันทึกประวัติการเปลี่ยนสังกัดนักเตะที่ผ่านการอนุมัติและปิดดีลเรียบร้อยแล้ว</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>รหัสประวัติ</th>
+                                <th>นักฟุตบอล</th>
+                                <th>ย้ายจากสโมสร (From Club)</th>
+                                <th>ย้ายไปสโมสร (To Club)</th>
+                                <th>ค่าตัวที่ตกลง (€)</th>
+                                <th>ค่าเหนื่อย (€/สัปดาห์)</th>
+                                <th>อนุมัติโดย</th>
+                                <th>วันเวลาที่ปิดดีล</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 3: CLUB VERIFICATION & EMAIL NOTIFICATIONS -->
+            <section id="tab-clubs" class="hidden">
+                <div class="data-card">
+                    <h3 style="margin-bottom: 14px; font-size: 17px;">🏦 ตรวจสอบสถานะการเงินสโมสร & อนุมัติบัญชี (ส่งอีเมลอัตโนมัติ)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>สโมสร</th>
+                                <th>ลีก / ประเทศ</th>
+                                <th>อีเมลติดต่อ</th>
+                                <th>ธนาคารรับรอง</th>
+                                <th>งบประมาณ (€)</th>
+                                <th>สถานะ</th>
+                                <th>การอนุมัติ (ส่งอีเมลแจ้งผล)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clubs-tbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="data-card">
+                    <h3 style="margin-bottom: 14px; font-size: 17px;">✉️ ประวัติการส่งอีเมลแจ้งเตือนสโมสร (Email Notification Logs)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>เวลาที่ส่ง</th>
+                                <th>ผู้รับ (สโมสร)</th>
+                                <th>อีเมลผู้รับ</th>
+                                <th>หัวข้ออีเมล</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emails-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 4: USER MANAGEMENT (ADMIN) -->
+            <section id="tab-users" class="hidden">
+                <div id="user-edit-panel" class="data-card hidden" style="border: 2px solid #1B9AE5;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 id="user-edit-title" style="font-size: 16px; font-weight: 700;">✏️ แก้ไขข้อมูลผู้ใช้งาน</h3>
+                        <button type="button" class="btn-back-page" onclick="closeUserEdit()">✖ ปิด</button>
+                    </div>
+                    <form onsubmit="handleSaveUser(event)">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="register-grid">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>ชื่อผู้ใช้งาน (Username)</label>
+                                    <input type="text" id="edit-user-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>บทบาท (Role)</label>
+                                    <select id="edit-user-role" class="form-control">
+                                        <option value="Admin">Admin</option>
+                                        <option value="Club">Club</option>
+                                        <option value="Agent">Agent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>สถานะบัญชี (Status)</label>
+                                    <select id="edit-user-status" class="form-control">
+                                        <option value="Active">Active</option>
+                                        <option value="Pending_Verification">Pending_Verification</option>
+                                        <option value="Suspended">Suspended</option>
+                                        <option value="Rejected">Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>รหัสผ่านใหม่ (เว้นว่างหากไม่เปลี่ยน)</label>
+                                    <input type="password" id="edit-user-password" class="form-control" placeholder="เว้นว่างหากใช้รหัสเดิม">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary-full" style="margin-top: 8px;">💾 บันทึกการแก้ไขผู้ใช้</button>
+                    </form>
+                </div>
+
+                <div class="data-card">
+                    <h3 style="margin-bottom: 14px; font-size: 17px;">👥 จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อผู้ใช้งาน (Username)</th>
+                                <th>บทบาท (Role)</th>
+                                <th>สถานะ (Status)</th>
+                                <th>การจัดการ (แก้ไข / ลบ)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== EMAIL NOTIFICATION SENT MODAL (เด้งแจ้งเตือนการส่งอีเมล) ==================== -->
+    <div id="email-sent-modal" class="modal-backdrop hidden" onclick="closeEmailSentModal(event)">
+        <div class="email-modal-card" onclick="event.stopPropagation()">
+            <!-- Header with animated envelope icon -->
+            <div class="email-modal-header" id="email-modal-header-box">
+                <div class="email-icon-circle" id="email-modal-icon-circle">
+                    <span id="email-modal-icon" style="font-size: 32px;">✉️</span>
+                </div>
+                <div style="flex: 1;">
+                    <h3 id="email-modal-title" style="margin: 0; font-size: 19px; font-weight: 800; color: #FFFFFF;">
+                        อีเมลถูกส่งออกเรียบร้อยแล้ว!
+                    </h3>
+                    <p id="email-modal-subtitle" style="margin: 4px 0 0; font-size: 12.5px; color: #CBD5E1;">
+                        ระบบได้ทำการส่งและบันทึกอีเมลแจ้งผลการตรวจสอบสโมสรเรียบร้อยแล้ว
+                    </p>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="closeEmailSentModal(event)" title="ปิดหน้าต่าง">✕</button>
+            </div>
+
+            <!-- Email Summary Badges -->
+            <div class="email-meta-bar">
+                <div class="email-meta-item">
+                    <span class="email-meta-label">ผลการพิจารณา:</span>
+                    <span id="email-modal-decision-badge" class="status-pill status-Rejected">❌ ไม่ผ่านการอนุมัติ (REJECTED)</span>
+                </div>
+                <div class="email-meta-item">
+                    <span class="email-meta-label">สโมสร:</span>
+                    <strong id="email-modal-club-name" style="color: #FFFFFF;">ครูคอมแต่ง</strong>
+                </div>
+                <div class="email-meta-item">
+                    <span class="email-meta-label">อีเมลแอดมิน (From):</span>
+                    <strong id="email-modal-sender" style="color: #FDBA74; font-family: monospace;">footballbetatitle@gmail.com</strong>
+                </div>
+                <div class="email-meta-item">
+                    <span class="email-meta-label">ส่งไปยัง (To):</span>
+                    <span id="email-modal-recipient" style="color: #38BDF8; font-weight: 600;">srisawast98@gmail.com</span>
+                </div>
+                <div class="email-meta-item">
+                    <span class="email-meta-label">สถานะการส่ง:</span>
+                    <span id="email-modal-status-badge" style="color: #4ADE80; font-weight: 600;">✔ Sent & Logged</span>
+                </div>
+            </div>
+
+            <!-- Subject -->
+            <div style="padding: 12px 18px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <span style="font-size: 11px; font-weight: 700; color: #FB923C; text-transform: uppercase; letter-spacing: 0.5px;">หัวข้ออีเมล (Subject):</span>
+                <div id="email-modal-subject" style="margin-top: 4px; font-size: 14px; font-weight: 700; color: #F8FAFC;">
+                    [UEFA FFP & TMS] แจ้งผลการตรวจสอบ — การสมัครสโมสร ครูคอมแต่ง ไม่ผ่านการอนุมัติ
+                </div>
+            </div>
+
+            <!-- Body Preview -->
+            <div style="padding: 16px 18px; max-height: 280px; overflow-y: auto;">
+                <span style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px;">เนื้อหาอีเมลทางการ (Email Message Body):</span>
+                <pre id="email-modal-body" class="email-body-preview"></pre>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="email-modal-footer" style="flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="font-size: 12px; color: #CBD5E1; display: flex; align-items: center; gap: 6px;">
+                    <span style="color: #4ADE80; font-size: 14px;">✔</span> ส่งอีเมลออกเรียบร้อยแล้ว (สโมสรสามารถกด Reply ตอบกลับเข้า footballbetatitle@gmail.com ได้ทันที)
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-sm btn-gray" onclick="copyEmailContent()" id="btn-copy-email">
+                        📋 คัดลอกข้อความ
+                    </button>
+                    <button type="button" class="btn-sm btn-orange" onclick="closeEmailSentModal(event)">
+                        ตกลง / ปิดหน้าต่าง (OK)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deal Completed Celebration Modal (เด้งแจ้งเตือนปิดดีลและอนุมัติย้ายสังกัดสำเร็จ) -->
+    <div id="deal-completed-modal" class="email-modal-overlay hidden" onclick="if(event.target===this)closeDealCompletedModal()">
+        <div class="email-modal-card" style="max-width: 540px; border-color: #10B981; box-shadow: 0 25px 60px rgba(0,0,0,0.75), 0 0 35px rgba(16,185,129,0.35);">
+            <div class="email-modal-header" style="background: linear-gradient(135deg, #064E3B 0%, #065F46 100%); border-bottom: 2px solid #10B981;">
+                <div class="email-modal-title-group">
+                    <span style="font-size: 32px;">🎉</span>
+                    <div>
+                        <h3 id="deal-modal-title" style="font-size: 19px; font-weight: 800; color: #FFFFFF; margin: 0;">
+                            👑 อนุมัติปิดดีลสำเร็จ! (Deal Official)
+                        </h3>
+                        <p style="font-size: 13px; color: #A7F3D0; margin: 4px 0 0 0;">
+                            การย้ายสังกัดเสร็จสมบูรณ์ • บันทึกสัญญาและสถิติลงระบบทันที
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="closeDealCompletedModal()" title="ปิดหน้าต่าง">✕</button>
+            </div>
+
+            <div style="padding: 24px 20px; text-align: center; background: #0F172A;">
+                <div style="display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 18px;">
+                    <div style="text-align: center;">
+                        <img id="deal-modal-player-img" src="/assets/players/player_1.png" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid #10B981; background: #1E293B;" onerror="this.src='/assets/players/player_1.png'">
+                        <div id="deal-modal-player-name" style="font-weight: 800; color: #FFFFFF; font-size: 17px; margin-top: 8px;">นักเตะ</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 14px 18px; margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-around; align-items: center; font-size: 14px;">
+                        <div>
+                            <span style="color: #94A3B8; font-size: 11px; display: block; margin-bottom: 3px;">สโมสรเดิม</span>
+                            <strong id="deal-modal-from-club" style="color: #CBD5E1; font-size: 15px;">-</strong>
+                        </div>
+                        <div style="font-size: 24px; color: #10B981; font-weight: 800;">➔</div>
+                        <div>
+                            <span style="color: #94A3B8; font-size: 11px; display: block; margin-bottom: 3px;">สโมสรใหม่</span>
+                            <strong id="deal-modal-to-club" style="color: #34D399; font-size: 15px;">-</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.15); display: flex; justify-content: space-around; font-size: 13px;">
+                        <div>
+                            <span style="color: #94A3B8; font-size: 11px;">มูลค่าค่าตัว:</span>
+                            <strong id="deal-modal-fee" style="color: #FBBF24; font-size: 15px; margin-left: 4px;">-</strong>
+                        </div>
+                        <div>
+                            <span style="color: #94A3B8; font-size: 11px;">ค่าเหนื่อย:</span>
+                            <strong id="deal-modal-wage" style="color: #60A5FA; font-size: 15px; margin-left: 4px;">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="font-size: 13px; color: #94A3B8; margin: 0 0 20px 0;">
+                    ระบบได้ทำการย้ายสังกัดนักเตะ ปรับปรุงงบประมาณสโมสร และส่งอีเมลแจ้งเตือนทุกฝ่ายเรียบร้อยแล้ว
+                </p>
+
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <button type="button" class="btn-sm btn-blue" style="height: 40px; padding: 0 22px; font-weight: 700; border-radius: 999px;" onclick="goToSquadFromDealModal()">
+                        ⚽ ดูนักเตะในหน้าสโมสร
+                    </button>
+                    <button type="button" class="btn-sm btn-green" style="height: 40px; padding: 0 22px; font-weight: 700; border-radius: 999px;" onclick="closeDealCompletedModal()">
+                        ตกลง (OK)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 3. AGENT PROFILE MODAL (หน้าโปรไฟล์เอเยนต์) ==================== -->
+    <div id="agent-profile-modal" class="modal-backdrop hidden" onclick="if(event.target===this)closeAgentProfile()">
+        <div class="email-modal-card" style="max-width: 820px; border-color: #EA580C; box-shadow: 0 25px 60px rgba(0,0,0,0.75), 0 0 35px rgba(234,88,12,0.35);">
+            <div class="email-modal-header" style="background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%); border-bottom: 2px solid #EA580C;">
+                <div class="email-modal-title-group">
+                    <span style="font-size: 30px;">💼</span>
+                    <div>
+                        <h3 id="agent-profile-header-name" style="font-size: 19px; font-weight: 800; color: #FFFFFF; margin: 0;">
+                            โปรไฟล์เอเยนต์ & ตัวแทนนักเตะ (Agent Profile)
+                        </h3>
+                        <p style="font-size: 12.5px; color: #FED7AA; margin: 4px 0 0 0;">
+                            ตรวจสอบข้อมูลสังกัด ใบอนุญาต และรายชื่อนักฟุตบอลในความดูแล
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" id="btn-edit-agent-profile" class="btn-sm btn-blue" style="height: 34px; padding: 0 14px; font-weight: 700; border-radius: 999px;" onclick="openEditAgentProfileModal()">
+                        ✏️ แก้ไขโปรไฟล์
+                    </button>
+                    <button type="button" class="btn-close-modal" onclick="closeAgentProfile()" title="ปิดหน้าต่าง">✕</button>
+                </div>
+            </div>
+
+            <div style="padding: 22px 24px; background: #0B0F19; max-height: 82vh; overflow-y: auto;">
+                <!-- Upper Profile Banner -->
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; background: #0F172A; border: 1px solid rgba(255, 102, 0, 0.35); border-radius: 18px; padding: 18px 22px; margin-bottom: 18px;">
+                    <img id="agent-profile-avatar" src="/assets/players/player_1.png" class="agent-profile-avatar" onerror="this.src='/assets/logo.png'">
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                            <h2 id="agent-profile-fullname" style="font-size: 22px; font-weight: 800; color: #FFFFFF; margin: 0;">-</h2>
+                            <span class="status-pill status-Active" style="background: rgba(16, 185, 129, 0.18); color: #34D399; border: 1px solid #10B981;">
+                                ✓ FIFA Licensed Agent
+                            </span>
+                        </div>
+                        <div id="agent-profile-agency" style="font-size: 14px; font-weight: 700; color: #FB923C; margin-bottom: 8px;">-</div>
+                        <p id="agent-profile-bio" style="font-size: 13px; color: #CBD5E1; margin: 0 0 12px; line-height: 1.5;">-</p>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span class="agent-info-tag">✉️ <span id="agent-profile-email">-</span></span>
+                            <span class="agent-info-tag">📞 <span id="agent-profile-phone">-</span></span>
+                            <span class="agent-info-tag">📜 <span id="agent-profile-license">-</span></span>
+                            <span class="agent-info-tag">🌐 <span id="agent-profile-country">-</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Row -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                    <div class="agent-kpi-card">
+                        <div class="agent-kpi-lbl">⚽ นักเตะในความดูแล</div>
+                        <div class="agent-kpi-val" id="agent-kpi-players-count">0 คน</div>
+                    </div>
+                    <div class="agent-kpi-card">
+                        <div class="agent-kpi-lbl">💰 มูลค่ารวมในสังกัด</div>
+                        <div class="agent-kpi-val" id="agent-kpi-total-val" style="color: #FBBF24;">€0</div>
+                    </div>
+                    <div class="agent-kpi-card">
+                        <div class="agent-kpi-lbl">⭐ ค่าพลังเฉลี่ย (AVG OVR)</div>
+                        <div class="agent-kpi-val" id="agent-kpi-avg-ovr" style="color: #34D399;">-</div>
+                    </div>
+                </div>
+
+                <!-- Players Roster Managed by Agent -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1.5px solid rgba(255, 102, 0, 0.35); padding-bottom: 8px;">
+                    <h3 style="font-size: 17px; font-weight: 800; color: #FFFFFF; margin: 0;">
+                        ⚽ รายชื่อนักเตะในความดูแล (Represented Squad)
+                    </h3>
+                    <button type="button" id="btn-agent-add-player" class="btn-sm btn-blue" style="height: 32px; padding: 0 14px; font-size: 12px;" onclick="addPlayerForCurrentAgent()">
+                        ➕ เพิ่มนักเตะในสังกัด
+                    </button>
+                </div>
+                <div id="agent-players-grid" class="players-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 3.1 EDIT AGENT PROFILE MODAL ==================== -->
+    <div id="agent-edit-profile-modal" class="modal-backdrop hidden" onclick="if(event.target===this)closeEditAgentProfileModal()">
+        <div class="email-modal-card" style="max-width: 600px; border-color: #3B82F6; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 35px rgba(59,130,246,0.3);">
+            <div class="email-modal-header" style="background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%); border-bottom: 2px solid #3B82F6;">
+                <div class="email-modal-title-group" style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(59,130,246,0.2); border: 1.5px solid rgba(59,130,246,0.6); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 16px rgba(59,130,246,0.35);">
+                        💼
+                    </div>
+                    <div>
+                        <h3 style="font-size: 19px; font-weight: 800; color: #FFFFFF; margin: 0;">แก้ไขข้อมูลโปรไฟล์เอเยนต์</h3>
+                        <p style="font-size: 12.5px; color: #BFDBFE; margin: 2px 0 0;">อัปเดตข้อมูลสังกัด เลขที่ใบอนุญาตฟีฟ่า ช่องทางติดต่อ และรูปถ่ายตัวแทน</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="closeEditAgentProfileModal()" title="ปิดหน้าต่าง">✕</button>
+            </div>
+            <form id="edit-agent-profile-form" onsubmit="handleSaveAgentProfile(event)" class="modal-form-dark">
+                <input type="hidden" id="edit-agent-id" value="">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>ชื่อตัวแทน (First Name) *</label>
+                        <input type="text" id="edit-agent-firstname" class="form-control" required placeholder="เช่น Jorge">
+                    </div>
+                    <div class="form-group">
+                        <label>นามสกุล (Last Name) *</label>
+                        <input type="text" id="edit-agent-lastname" class="form-control" required placeholder="เช่น Mendes">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ชื่อบริษัท / เอเยนซี (Agency Name) *</label>
+                    <input type="text" id="edit-agent-agency" class="form-control" placeholder="เช่น Gestifute, Pro Agent Thailand" required>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>อีเมลติดต่อทางการ (Email) *</label>
+                        <input type="email" id="edit-agent-email" class="form-control" required placeholder="agent@agency.com">
+                    </div>
+                    <div class="form-group">
+                        <label>เบอร์โทรศัพท์ (Phone)</label>
+                        <input type="text" id="edit-agent-phone" class="form-control" placeholder="+66 8x-xxx-xxxx">
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>เลขที่ใบอนุญาตฟีฟ่า (FIFA License No.)</label>
+                        <input type="text" id="edit-agent-license" class="form-control" placeholder="FIFA-LIC-2026-xxx">
+                    </div>
+                    <div class="form-group">
+                        <label>ประเทศสำนักงานใหญ่ (Country)</label>
+                        <input type="text" id="edit-agent-country" class="form-control" value="International">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ประวัติย่อ / ข้อมูลสังกัดแนะนำตัว (Bio)</label>
+                    <textarea id="edit-agent-bio" class="form-control" rows="3" placeholder="ระบุความเชี่ยวชาญ สังกัดลีก ประสบการณ์ดูแลนักเตะ"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>📸 รูปประจำตัวเอเยนต์ / โลโก้เอเยนซี (PNG / JPG)</label>
+                    <div class="modal-upload-dropzone" onclick="document.getElementById('edit-agent-photo-file').click()">
+                        <input type="file" id="edit-agent-photo-file" style="display:none;" accept="image/*" onchange="handleAgentPhotoSelect(this)">
+                        <div style="font-size: 26px; margin-bottom: 6px;">🖼️</div>
+                        <div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF;">คลิกที่นี่เพื่อเลือกรูปภาพจากเครื่อง</div>
+                        <div style="font-size: 11.5px; color: #94A3B8; margin-top: 3px;">รองรับไฟล์ PNG, JPG, JPEG, WEBP</div>
+                    </div>
+                    <div id="edit-agent-photo-preview-box" class="hidden" style="margin-top: 12px; display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.3);">
+                        <img id="edit-agent-photo-preview" src="" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2.5px solid #3B82F6; box-shadow: 0 4px 12px rgba(59,130,246,0.4);">
+                        <div>
+                            <div style="font-size: 13px; color: #34D399; font-weight: 700;">✓ โหลดภาพตัวแทนเรียบร้อย</div>
+                            <div style="font-size: 11.5px; color: #94A3B8;">พร้อมบันทึกเป็นรูปโปรไฟล์</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+                    <button type="button" class="btn-sm btn-gray" style="height: 38px; padding: 0 18px; border-radius: 10px;" onclick="closeEditAgentProfileModal()">✕ ยกเลิก</button>
+                    <button type="submit" class="btn-sm btn-blue" style="height: 38px; padding: 0 22px; font-weight: 700; border-radius: 10px;">💾 บันทึกโปรไฟล์เอเยนต์</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== 4. CLUB LOGO UPLOAD MODAL ==================== -->
+    <div id="club-logo-modal" class="modal-backdrop hidden" onclick="if(event.target===this)closeClubLogoModal()">
+        <div class="email-modal-card" style="max-width: 500px; border-color: #EA580C; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 35px rgba(234,88,12,0.35);">
+            <div class="email-modal-header" style="background: linear-gradient(135deg, #C2410C 0%, #EA580C 100%); border-bottom: 2px solid #EA580C;">
+                <div class="email-modal-title-group" style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 16px rgba(0,0,0,0.25);">
+                        🛡️
+                    </div>
+                    <div>
+                        <h3 style="font-size: 19px; font-weight: 800; color: #FFFFFF; margin: 0;">จัดการตราสโมสร (Club Logo)</h3>
+                        <p style="font-size: 12.5px; color: #FFEDD5; margin: 2px 0 0;">อัปโหลดโลโก้ทางการของสโมสรฟุตบอลเพื่อแสดงในระบบ</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="closeClubLogoModal()" title="ปิดหน้าต่าง">✕</button>
+            </div>
+            <form id="club-logo-form" onsubmit="handleSaveClubLogo(event)" class="modal-form-dark">
+                <div class="form-group admin-only" id="club-logo-select-group">
+                    <label>เลือกสโมสรที่ต้องการแก้ไขโลโก้</label>
+                    <select id="club-logo-cid-select" class="form-control" onchange="handleClubLogoCidChange(this.value)"></select>
+                </div>
+                <input type="hidden" id="club-logo-target-cid" value="">
+                
+                <div style="text-align: center; margin: 12px 0 20px 0; background: rgba(255,255,255,0.03); padding: 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                    <div style="display: inline-block; position: relative;">
+                        <img id="club-logo-current-preview" src="/assets/logo.png" style="width: 96px; height: 96px; object-fit: contain; border-radius: 20px; background: #FFFFFF; border: 2.5px solid #FED7AA; padding: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);" onerror="this.src='/assets/logo.png'">
+                    </div>
+                    <div id="club-logo-target-name" style="font-size: 17px; font-weight: 800; color: #FFFFFF; margin-top: 10px;">สโมสร</div>
+                    <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">แสดงบนการ์ดนักเตะ ตารางคะแนน และทำเนียบสโมสร</div>
+                </div>
+
+                <div class="form-group">
+                    <label>📂 เลือกไฟล์โลโก้ใหม่ (PNG, JPG, WEBP, SVG)</label>
+                    <div class="modal-upload-dropzone" onclick="document.getElementById('club-logo-file-input').click()">
+                        <input type="file" id="club-logo-file-input" style="display:none;" accept="image/*" onchange="handleClubLogoModalFile(this)">
+                        <div style="font-size: 26px; margin-bottom: 6px;">📤</div>
+                        <div style="font-size: 13.5px; font-weight: 700; color: #FFFFFF;">คลิกเพื่ออัปโหลดไฟล์ตราสโมสร</div>
+                        <div style="font-size: 11.5px; color: #FED7AA; margin-top: 3px;">💡 แนะนำรูปภาพสี่เหลี่ยมจัตุรัส พื้นหลังโปร่งใส (Transparent PNG)</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
+                    <button type="button" class="btn-sm btn-gray" style="height: 38px; padding: 0 18px; border-radius: 10px;" onclick="closeClubLogoModal()">✕ ยกเลิก</button>
+                    <button type="submit" class="btn-sm btn-green" style="height: 38px; padding: 0 24px; font-weight: 700; border-radius: 10px;">💾 บันทึกโลโก้สโมสร</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Live Toast Notification -->
+    <div id="live-toast-alert" class="live-toast-box hidden">
+        <span id="live-toast-icon" style="font-size: 20px;">✉️</span>
+        <div style="flex: 1;">
+            <div id="live-toast-title" style="font-weight: 700; font-size: 13.5px; color: #FFFFFF;">ส่งอีเมลเรียบร้อย!</div>
+            <div id="live-toast-msg" style="font-size: 12px; color: #CBD5E1;">ระบบได้ส่งอีเมลแจ้งผลทางการแล้ว</div>
+        </div>
+    </div>
+
+    <script src="app.js?v=47"></script>
+</body>
+</html>
